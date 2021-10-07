@@ -65,9 +65,17 @@ export default function App() {
   const onFinish = async ({ textInput }: any) => {
     if (textInput) {
       console.log("Sending...", textInput);
-      await tnbpay.sendCoins(tnbchat, 1, encodedText);
+      const block = await tnbpay.sendCoins(tnbchat, 1, encodedText);
       setEncodedText("");
-      getPosts();
+
+      const tx: PaginatedTransactionEntry = {
+        recipient: tnbchat,
+        amount: 1,
+        block,
+        memo: encodedText,
+        id: "122" + textInput.slice(0, 5),
+      };
+      setPosts((prev) => [tx, ...prev]);
     }
   };
 

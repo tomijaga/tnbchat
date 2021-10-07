@@ -5,13 +5,14 @@ import isUrl from "is-url";
 
 export const encode = async (plainText: string) => {
   if (isUrl(plainText)) {
+    if (plainText.endsWith(".png")){
     // if (await isImageUrl(plainText)) {
     //Link to create tinyurl
     plainText = (
       await axios.get(`http://tinyurl.com/api-create.php?url=${plainText}`)
     ).data;
     console.log("shortened image link", plainText);
-    // }
+    }
   }
 
   const textAsBytes = Buffer.from(

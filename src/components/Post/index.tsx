@@ -20,6 +20,7 @@ import Typography from "antd/es/typography";
 import { decode } from "utils";
 import { formatDistanceToNowStrict } from "date-fns";
 import isUrl from "is-url";
+import Grid from "antd/es/grid";
 
 const memoTextToComponent = (word: string) => {
   if (word === "") return <Typography.Text> </Typography.Text>;
@@ -63,7 +64,9 @@ const formatMemo = (memo: string) => {
   return formattedWords;
 };
 
+const { useBreakpoint } = Grid;
 export const Post: FC<{ data: PaginatedTransactionEntry }> = ({ data: tx }) => {
+  const screens = useBreakpoint();
   return (
     <Card>
       <Col span={24}>
@@ -98,9 +101,8 @@ export const Post: FC<{ data: PaginatedTransactionEntry }> = ({ data: tx }) => {
                   </Col>
                 </Row>
               </Col>
-
               <Col>
-                <Row gutter={40} align="bottom">
+                <Row gutter={screens.xs ? 5 : 40} align="bottom">
                   <Col style={{ fontSize: "small", color: "lightgray" }}>
                     {formatDistanceToNowStrict(new Date(tx.block.modified_date))
                       .replaceAll(/hour(s)/g, "h")

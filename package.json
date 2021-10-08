@@ -7,24 +7,35 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+    "@types/aes-js": "^3.1.1",
+    "@types/bcrypt": "^5.0.1",
     "@types/bs58": "^4.0.1",
     "@types/is-url": "^1.2.30",
     "@types/react": "^17.0.27",
     "@types/react-dom": "^17.0.9",
+    "@types/react-router-dom": "^5.3.1",
+    "aes-js": "^3.1.2",
     "antd": "4.16.13",
     "axios": "0.21.4",
     "base58-js": "^1.0.0",
+    "bcrypt": "^5.0.0",
     "bs58": "^4.0.1",
     "date-fns": "^2.25.0",
     "image-url-validator": "^1.0.4",
     "is-url": "^1.2.4",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-scripts": "4.0.3",
+    "react-router-dom": "^5.3.0",
+    "react-scripts": "^3.4.4",
     "thenewboston": "1.1.0-alpha.4",
     "tinyurl": "^1.1.7",
+    "tnb-hd-wallet": "^1.1.1",
     "typescript": "^4.4.3",
     "web-vitals": "^1.1.2"
+  },
+  "resolutions": {
+    "**/@typescript-eslint/eslint-plugin": "^4.1.1",
+    "**/@typescript-eslint/parser": "^4.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -49,5 +60,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/node": "^16.10.3"
   }
 }

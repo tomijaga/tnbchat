@@ -2,7 +2,7 @@ import 'antd/dist/antd.css';
 import '../styles.css';
 import '../App.css';
 
-import {Account, AccountPaymentHandler, Bank, PaginatedTransactionEntry, Transaction} from '../thenewboston-js/src';
+import {Account, AccountPaymentHandler, Bank, PaginatedTransactionEntry, Transaction} from '../thenewboston/src';
 import {FC, ReactNode, useEffect, useRef, useState} from 'react';
 
 import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';

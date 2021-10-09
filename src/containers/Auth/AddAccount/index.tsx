@@ -1,25 +1,21 @@
-import { FC, ReactNode, useState } from "react";
-import Card from "antd/es/card";
-import Col from "antd/es/col";
-import Button from "antd/es/button";
-import Row from "antd/es/row";
-import Form from "antd/es/form";
-import { generateMnemonic } from "tnb-hd-wallet";
-import { Input, Typography } from "antd";
-import { Aes } from "utils";
-import { Account } from "thenewboston-js/src";
-import { HdWallet } from "tnb-hd-wallet";
-type AddAccountOption =
-  | "create_account"
-  | "import_seed_phrase"
-  | "import_signing_key"
-  | "none";
+import {FC, ReactNode, useState} from 'react';
+import Card from 'antd/es/card';
+import Col from 'antd/es/col';
+import Button from 'antd/es/button';
+import Row from 'antd/es/row';
+import Form from 'antd/es/form';
+import {generateMnemonic} from 'tnb-hd-wallet';
+import {Input, Typography} from 'antd';
+import {Aes} from 'utils';
+import {Account} from 'thenewboston/src';
+import {HdWallet} from 'tnb-hd-wallet';
+type AddAccountOption = 'create_account' | 'import_seed_phrase' | 'import_signing_key' | 'none';
 
 type Address = {
   account_number: string;
   username: string;
   // not_derived means its not derived from the seed phrase (The user imported a signing key)
-  path: string | "not_derived";
+  path: string | 'not_derived';
 };
 
 interface TNBChatAccount {
@@ -30,23 +26,22 @@ interface TNBChatAccount {
   num_of_imported_addresses: number;
   addresses: Address[];
 }
-const AddAccount: FC<{ cypherAlgorithm: Aes }> = ({ cypherAlgorithm }) => {
-  const [option, setOption] = useState<AddAccountOption>("none");
+const AddAccount: FC<{cypherAlgorithm: Aes}> = ({cypherAlgorithm}) => {
+  const [option, setOption] = useState<AddAccountOption>('none');
   const [isSuccess, setIsSuccess] = useState(false);
 
   const importForm = () => {
-    const text =
-      option === "import_signing_key" ? "Signing Key" : "Seed Phrase";
+    const text = option === 'import_signing_key' ? 'Signing Key' : 'Seed Phrase';
 
     const handleAccountImport = (importData: any) => {
       const plainText = importData[option];
 
-      if (!plainText) throw new Error("Signing Key or Seed Phrase is Empty");
+      if (!plainText) throw new Error('Signing Key or Seed Phrase is Empty');
 
       const cyphertext = cypherAlgorithm.ctrEncryption(plainText);
 
       if (cyphertext) {
-        const accountJSONasText = localStorage.getItem("tnbchat_account") ?? "";
+        const accountJSONasText = localStorage.getItem('tnbchat_account') ?? '';
 
         let account: TNBChatAccount;
 
@@ -54,18 +49,18 @@ const AddAccount: FC<{ cypherAlgorithm: Aes }> = ({ cypherAlgorithm }) => {
           account = JSON.parse(accountJSONasText);
         } else {
           account = {
-            seed_phrase: "",
+            seed_phrase: '',
             num_of_imported_addresses: 0,
             addresses: [],
           };
         }
 
         // If cyphertext is a signing key
-        if (importData["import_signing_key"]) {
+        if (importData['import_signing_key']) {
           const newAddressData: Address = {
             account_number: new Account(plainText).accountNumberHex,
             username: importData.username,
-            path: "not_derived",
+            path: 'not_derived',
           };
 
           account.addresses.push(newAddressData);
@@ -75,8 +70,7 @@ const AddAccount: FC<{ cypherAlgorithm: Aes }> = ({ cypherAlgorithm }) => {
         } else {
           account.seed_phrase = cyphertext;
           const tnb = HdWallet.thenewboston(plainText);
-          const addressIndex =
-            account.addresses.length - account.num_of_imported_addresses;
+          const addressIndex = account.addresses.length - account.num_of_imported_addresses;
           const address = tnb.getAddress(0, addressIndex);
 
           account.addresses.push({
@@ -86,7 +80,7 @@ const AddAccount: FC<{ cypherAlgorithm: Aes }> = ({ cypherAlgorithm }) => {
           });
         }
 
-        localStorage.setItem("tnbchat_account", JSON.stringify(account));
+        localStorage.setItem('tnbchat_account', JSON.stringify(account));
         setIsSuccess(true);
       }
     };
@@ -96,7 +90,7 @@ const AddAccount: FC<{ cypherAlgorithm: Aes }> = ({ cypherAlgorithm }) => {
         <Form.Item label={text} name={option}>
           <Input.Password />
         </Form.Item>
-        <Form.Item label={"Username"} name={"username"}>
+        <Form.Item label={'Username'} name={'username'}>
           <Input />
         </Form.Item>
         <Form.Item>
@@ -114,8 +108,7 @@ const AddAccount: FC<{ cypherAlgorithm: Aes }> = ({ cypherAlgorithm }) => {
         <Typography.Text>
           Copy and save your seed phrase in a secure location.
           <br />
-          Go to this link to see the best ways to secure your seed phrase [Post
-          link here]
+          Go to this link to see the best ways to secure your seed phrase [Post link here]
         </Typography.Text>
         <Button>Verify Seed Phrase</Button>
       </>
@@ -127,27 +120,21 @@ const AddAccount: FC<{ cypherAlgorithm: Aes }> = ({ cypherAlgorithm }) => {
   return (
     <Row gutter={[40, 40]}>
       {isSuccess === false ? (
-        option === "none" ? (
+        option === 'none' ? (
           <>
             <Col>
-              <Button onClick={() => setOption("create_account")}>
-                Create Account
-              </Button>
+              <Button onClick={() => setOption('create_account')}>Create Account</Button>
             </Col>
             <Col>
-              <Button onClick={() => setOption("import_signing_key")}>
-                Import Signing Key
-              </Button>
+              <Button onClick={() => setOption('import_signing_key')}>Import Signing Key</Button>
             </Col>
             <Col>
-              <Button onClick={() => setOption("import_seed_phrase")}>
-                Import Seed Phrase
-              </Button>
+              <Button onClick={() => setOption('import_seed_phrase')}>Import Seed Phrase</Button>
             </Col>
           </>
         ) : (
           <>
-            <Button onClick={() => setOption("none")}>Back button</Button>
+            <Button onClick={() => setOption('none')}>Back button</Button>
             {component[option]}
           </>
         )

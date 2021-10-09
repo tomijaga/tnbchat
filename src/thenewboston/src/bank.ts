@@ -1,7 +1,6 @@
 import { ServerNode } from "./server-node";
 import { PrimaryValidator } from "./primary-validator";
 import type {
-  CrawlCommand,
   PaginationOptions,
   BankConfigResponse,
   Transaction,
@@ -18,7 +17,7 @@ import type {
 } from "./models";
 import type { Account } from "./account";
 
-interface TransactionQuery{
+interface TransactionQuery {
   recipient?: string;
 }
 /** Used for creating banks and sending requests easily to that specific bank server node. */
@@ -32,7 +31,6 @@ export class Bank extends ServerNode {
   async updateAccountTrust(accountNumber: string, trust: number, account: Account) {
     return await super.patchData(`/accounts/${accountNumber}`, account.createSignedMessage({ trust }));
   }
-
 
   /**
    * Gets the transactions for the given bank.
@@ -103,7 +101,10 @@ export class Bank extends ServerNode {
    * @param account the account that is sending the transactions
    */
   async addBlocks(balanceLock: string, transactions: Transaction[], account: Account) {
-    return await super.postData<PaginatedBlockEntry & PaginatedEntryMetadata>("/blocks", account.createBlockMessage(balanceLock, transactions));
+    return await super.postData<PaginatedBlockEntry & PaginatedEntryMetadata>(
+      "/blocks",
+      account.createBlockMessage(balanceLock, transactions)
+    );
   }
 
   /**

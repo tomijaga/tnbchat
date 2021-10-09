@@ -1,7 +1,6 @@
 import { Validator } from "./validator";
 import type { Account } from "./account";
 import type {
-  BankConfirmationServices,
   ConfirmationValidatorConfigResponse,
   CleanResponse,
   CrawlResponse,

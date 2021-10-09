@@ -5,7 +5,6 @@ import type {
   AccountBalanceLockResponse,
   PaginatedBankEntry,
   PaginatedValidatorEntry,
-  PaginatedTransactionEntry,
   PaginationOptions,
   ConfirmationBlock,
 } from "./models";

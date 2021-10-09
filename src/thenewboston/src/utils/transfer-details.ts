@@ -1,5 +1,4 @@
 import type { Account } from "../account";
-import { throwError } from "./throw-error";
 
 export class TransferDetails {
   public sender: Account;

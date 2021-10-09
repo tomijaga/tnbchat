@@ -1,8 +1,16 @@
 import aesjs from "aes-js";
-import bcrypt from "bcrypt";
+import scrypt from "scrypt-js";
 
 export const stringToBytes = (text: string) => {
-  return aesjs.utils.hex.toBytes(text);
+  return aesjs.utils.utf8.toBytes(text);
+};
+
+export const hexToBytes = (hex: string) => {
+  return aesjs.utils.hex.toBytes(hex);
+};
+
+export const bytesToHex = (bytes: Uint8Array) => {
+  return aesjs.utils.hex.fromBytes(bytes);
 };
 
 export const bytesToString = (bytes: Uint8Array) => {
@@ -11,15 +19,32 @@ export const bytesToString = (bytes: Uint8Array) => {
 
 export class Aes {
   private hashInBytes: Uint8Array;
-  constructor(keyAsString: string) {
-    // 128-bit key (16 bytes * 8 bits/byte = 128 bits)
-    const salt = bcrypt.genSaltSync(Number(process.env.REACT_APP_SALT_ROUNDS!));
-    const hash = bcrypt.hashSync(keyAsString, salt);
-    console.log({ hash });
-    this.hashInBytes = stringToBytes(hash);
+
+  constructor(password: string) {
+    // We need each key to be 16 bytes so we are going to create a
+    // 16 byte hash with the user's password and a known salt
+
+    const keyInBytes = Buffer.from(password.normalize("NFKC"));
+    const saltInBytes = Buffer.from(
+      process.env.REACT_APP_SALT!.normalize("NFKC")
+    );
+
+    const bytesLength = 16;
+    this.hashInBytes = scrypt.syncScrypt(
+      keyInBytes,
+      saltInBytes,
+      1024,
+      8,
+      1,
+      bytesLength
+    );
+    console.log({ password, hashInBytes: this.hashInBytes });
   }
 
   ctrEncryption = (text: string, counter: number = 1) => {
+    text = text.normalize();
+    console.log({ text });
+
     // Convert text to bytes
     const textBytes = stringToBytes(text);
 
@@ -31,8 +56,9 @@ export class Aes {
     const encryptedBytes = aesCtr.encrypt(textBytes);
 
     // To print or store the binary data, you may convert it to hex
-    const encryptedHex = bytesToString(encryptedBytes);
+    const encryptedHex = bytesToHex(encryptedBytes);
 
+    // console.log({ text, encryptedHex });
     return encryptedHex;
   };
 

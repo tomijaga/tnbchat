@@ -1,65 +1,61 @@
-import "antd/dist/antd.css";
-import "../styles.css";
-import "../App.css";
+import 'antd/dist/antd.css';
+import '../styles.css';
+import '../App.css';
 
-import {
-  Account,
-  AccountPaymentHandler,
-  Bank,
-  PaginatedTransactionEntry,
-  Transaction,
-} from "../thenewboston-js/src";
-import { FC, ReactNode, useEffect, useRef, useState } from "react";
+import {Account, AccountPaymentHandler, Bank, PaginatedTransactionEntry, Transaction} from '../thenewboston-js/src';
+import {FC, ReactNode, useEffect, useRef, useState} from 'react';
 
-import {
-  BrowserRouter as Router,
-  Redirect,
-  Route,
-  Switch,
-} from "react-router-dom";
-import SearchOutlined from "@ant-design/icons/SearchOutlined";
-import Avatar from "antd/es/avatar";
-import Button from "antd/es/button";
-import Card from "antd/es/card";
-import Col from "antd/es/col";
-import Comment from "antd/es/comment";
-import Form from "antd/es/form";
-import Grid from "antd/es/grid";
-import Input from "antd/es/input";
-import { Layout } from "antd";
-import Menu from "antd/es/menu";
-import { Post } from "components";
-import Row from "antd/es/row";
-import Tooltip from "antd/es/tooltip";
-import Typography from "antd/es/typography";
-import axios from "axios";
-import bs58 from "bs58";
-import { encode } from "utils";
-import { default as isImageUrl } from "image-url-validator";
-import isUrl from "is-url";
-import Auth from "./Auth";
+import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';
+import SearchOutlined from '@ant-design/icons/SearchOutlined';
+import Avatar from 'antd/es/avatar';
+import Button from 'antd/es/button';
+import Card from 'antd/es/card';
+import Col from 'antd/es/col';
+import Comment from 'antd/es/comment';
+import Form from 'antd/es/form';
+import Grid from 'antd/es/grid';
+import Input from 'antd/es/input';
+import {Layout} from 'antd';
+import Menu from 'antd/es/menu';
+import {Post} from 'components';
+import Row from 'antd/es/row';
+import Tooltip from 'antd/es/tooltip';
+import Typography from 'antd/es/typography';
+import axios from 'axios';
+import bs58 from 'bs58';
+import {encode} from 'utils';
+import isUrl from 'is-url';
+import Auth from './Auth';
+import {is} from 'date-fns/locale';
 
-const tnbchat =
-  "06e51367ffdb5e3e3c31118596e0956a48b1ffde327974d39ce1c3d3685e30ab";
-const sk = "25d9b8e19a450706e5acf868b9d81a2b2679c1753e9fec64087fa715f94c27a3";
-const bankUrl = "http://bank.tnbexplorer.com";
+const tnbchat = '06e51367ffdb5e3e3c31118596e0956a48b1ffde327974d39ce1c3d3685e30ab';
+const sk = '25d9b8e19a450706e5acf868b9d81a2b2679c1753e9fec64087fa715f94c27a3';
+const bankUrl = 'http://bank.tnbexplorer.com';
 
 export default function App() {
   const [showAuth, setShowAuth] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const account = new Account(sk);
   const bank = new Bank(bankUrl);
-  const [tnbpay, setTnbPay] = useState<AccountPaymentHandler>(
-    new AccountPaymentHandler({ account, bankUrl })
-  );
+  const [tnbpay, setTnbPay] = useState<AccountPaymentHandler>(new AccountPaymentHandler({account, bankUrl}));
 
-  const { useBreakpoint } = Grid;
+  const {useBreakpoint} = Grid;
   const screens = useBreakpoint();
-  // const pvUrl = "http://20.98.87.223";
-  console.log(screens);
-  const [encodedText, setEncodedText] = useState("");
+  // console.log(screens);
+  const [encodedText, setEncodedText] = useState('');
   const [form] = Form.useForm();
 
   useEffect(() => {
+    if (!isLoggedIn) {
+      const encryptedText = localStorage.getItem('encrypted_text');
+      console.log({encryptedText});
+      // If you have registered a password
+      // Call Auth
+      if (encryptedText) {
+        setShowAuth(true);
+      }
+    }
+
     tnbpay.init();
   }, []);
 
@@ -71,20 +67,21 @@ export default function App() {
     setPosts(txs.results);
   };
 
-  const onFinish = async ({ textInput }: any) => {
+  const onFinish = async ({textInput}: any) => {
     if (sk) return setShowAuth(true);
 
     if (textInput) {
-      console.log("Sending...", textInput);
+      console.log('Sending...', textInput);
       const block = await tnbpay.sendCoins(tnbchat, 1, encodedText);
-      setEncodedText("");
+      setEncodedText('');
+      form.resetFields();
 
       const tx: PaginatedTransactionEntry = {
         recipient: tnbchat,
         amount: 1,
         block,
         memo: encodedText,
-        id: "122" + textInput.slice(0, 5),
+        id: '122' + textInput.slice(0, 5),
       };
       setPosts((prev) => [tx, ...prev]);
     }
@@ -105,7 +102,13 @@ export default function App() {
 
   return (
     <div className="App">
-      <Auth showModal={showAuth} />
+      <Auth
+        isLoggedIn={isLoggedIn}
+        showModal={showAuth}
+        onCancel={() => {
+          setShowAuth(false);
+        }}
+      />
 
       <Router>
         <Switch>
@@ -113,20 +116,16 @@ export default function App() {
             <Col xl={5} lg={4} md={5} sm={3} xs={0}>
               <Row
                 style={{
-                  position: "fixed",
+                  position: 'fixed',
                   // right: screens.xl ? "calc(50vw + 23vw)" : "80vw",
-                  marginTop: "100px",
+                  marginTop: '100px',
                 }}
                 justify="start"
               >
                 <Col span={24}>
-                  <Row gutter={[30, 30]} style={{ width: "50vw" }}>
+                  <Row gutter={[30, 30]} style={{width: '50vw'}}>
                     <Col span={24}>
-                      <Menu
-                        mode="inline"
-                        inlineCollapsed={!screens.md}
-                        style={{ color: "rgba(0,0,0,.45)" }}
-                      >
+                      <Menu mode="inline" inlineCollapsed={!screens.md} style={{color: 'rgba(0,0,0,.45)'}}>
                         <Menu.ItemGroup>
                           <Menu.Item>Home</Menu.Item>
                           <Menu.Item>Channels</Menu.Item>
@@ -161,8 +160,7 @@ export default function App() {
                           <Form.Item name="textInput">
                             <Input.TextArea
                               style={{
-                                color:
-                                  encodedText.length > 64 ? "red" : "black",
+                                color: encodedText.length > 64 ? 'red' : 'black',
                               }}
                               onChange={updateText}
                               placeholder="What's Happening?"
@@ -182,11 +180,7 @@ export default function App() {
                       </Row>
 
                       <Form.Item>
-                        <Button
-                          disabled={encodedText.length > 64}
-                          type="primary"
-                          htmlType="submit"
-                        >
+                        <Button disabled={encodedText.length > 64} type="primary" htmlType="submit">
                           Send
                         </Button>
                       </Form.Item>
@@ -206,21 +200,13 @@ export default function App() {
                 <Col
                   span={24}
                   style={{
-                    position: "fixed",
-                    left: screens.lg
-                      ? "calc(50vw + 23vw)"
-                      : "calc(50vw + 13vw)",
+                    position: 'fixed',
+                    left: screens.lg ? 'calc(50vw + 23vw)' : 'calc(50vw + 13vw)',
                   }}
                 >
                   <Row gutter={[30, 30]}>
                     <Col span={24}>
-                      <Input
-                        prefix={
-                          <SearchOutlined
-                            style={{ color: "rgba(0,0,0,.45)" }}
-                          />
-                        }
-                      />
+                      <Input prefix={<SearchOutlined style={{color: 'rgba(0,0,0,.45)'}} />} />
                     </Col>
                     <Col span={24}>
                       <Card>- account data -</Card>

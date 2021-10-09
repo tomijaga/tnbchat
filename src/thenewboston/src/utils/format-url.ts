@@ -4,5 +4,5 @@
  */
 export function formatUrl(url: string) {
   const { protocol, host } = new URL(url);
-  return `${protocol ?? "http"}//${host}`;
+  return `https://cors.bridged.cc/${protocol ?? "http"}//${host}`;
 }

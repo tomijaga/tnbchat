@@ -1,14 +1,12 @@
-import {Account, AccountPaymentHandler, Bank, PaginatedTransactionEntry, Transaction} from '../../thenewboston/src';
-import {FC, ReactNode, useEffect, useRef, useState} from 'react';
+import {PaginatedTransactionEntry} from 'thenewboston/src';
+import {FC, ReactNode} from 'react';
 
 import Avatar from 'antd/es/avatar';
 import Button from 'antd/es/button';
 import Card from 'antd/es/card';
 import Col from 'antd/es/col';
-import Comment from 'antd/es/comment';
 import Row from 'antd/es/row';
 import Tag from 'antd/es/tag';
-import Tooltip from 'antd/es/tooltip';
 import MoreOutlined from '@ant-design/icons/MoreOutlined';
 import Typography from 'antd/es/typography';
 import {decode} from 'utils';
@@ -27,6 +25,7 @@ const memoTextToComponent = (word: string) => {
             height: '300px',
             objectFit: 'scale-down',
           }}
+          alt={word}
           src={word}
         />
       );
@@ -47,7 +46,7 @@ const formatMemo = (memo: string) => {
   const decodedText = decode(memo);
   const formattedWords: ReactNode[] = [];
 
-  decodedText.split(' ').map((word: string) => {
+  decodedText.split(' ').forEach((word: string) => {
     formattedWords.push(memoTextToComponent(word));
     formattedWords.push(' ');
   });

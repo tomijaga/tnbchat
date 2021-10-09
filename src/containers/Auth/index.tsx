@@ -1,36 +1,29 @@
-import { FC, useEffect, useState, ReactNode } from "react";
-import Modal from "antd/es/modal";
-import Card from "antd/es/card";
-import Col from "antd/es/col";
-import Row from "antd/es/row";
+import {FC, useEffect, useState} from 'react';
+import Modal from 'antd/es/modal';
 
-import Form from "antd/es/form";
-import Input from "antd/es/input";
-import Button from "antd/es/button";
-import AddAccount from "./AddAccount";
-import RegisterPassword from "./RegisterPassword";
-import { Aes } from "utils/aes";
-import VerifyUser from "./VerifyUser";
+import AddAccount from './AddAccount';
+import RegisterPassword from './RegisterPassword';
+import {Aes} from 'utils/aes';
+import VerifyUser from './VerifyUser';
 
 const Auth: FC<{
   showModal?: boolean;
   isLoggedIn: boolean;
   onCancel: () => void;
-}> = ({ showModal, onCancel, isLoggedIn }) => {
+}> = ({showModal, onCancel, isLoggedIn}) => {
   const [cypherAlgorithm, setCypherAlgorithm] = useState<Aes | null>(null);
 
-  const [authStatus, setAuthStatus] =
-    useState<keyof typeof authComponents>("registerPassword");
+  const [authStatus, setAuthStatus] = useState<keyof typeof authComponents>('registerPassword');
 
   useEffect(() => {
     if (showModal) {
-      if (localStorage.getItem("encrypted_text")) {
-        setAuthStatus("verifyUser");
+      if (localStorage.getItem('encrypted_text')) {
+        setAuthStatus('verifyUser');
       }
     }
   }, [showModal]);
 
-  const handleCreatePasswordForm = ({ tnbchatPassword }: any) => {
+  const handleCreatePasswordForm = ({tnbchatPassword}: any) => {
     /**
      * This fn doesn't store the password
      * Instead it encrypts a known text and stores it in the browser
@@ -44,23 +37,23 @@ const Auth: FC<{
     const encryptedText = aes.ctrEncryption(plainText);
 
     if (encryptedText) {
-      localStorage.setItem("encrypted_text", JSON.stringify(encryptedText));
-      setAuthStatus("addAccount");
+      localStorage.setItem('encrypted_text', JSON.stringify(encryptedText));
+      setAuthStatus('addAccount');
       setCypherAlgorithm(() => aes);
     } else {
-      throw new Error("Key could not be Encrypted");
+      throw new Error('Key could not be Encrypted');
     }
   };
 
-  const handleVerifyUser = ({ tnbchatPassword }: any) => {
-    console.log({ tnbchatPassword });
+  const handleVerifyUser = ({tnbchatPassword}: any) => {
+    console.log({tnbchatPassword});
     const aes = new Aes(tnbchatPassword);
 
-    const encryptedText = localStorage.getItem("encrypted_text")!;
+    const encryptedText = localStorage.getItem('encrypted_text')!;
     const decryptedText = aes.ctrDecryption(encryptedText);
 
     if (decryptedText === process.env.REACT_APP_PLAIN_TEXT) {
-      console.log("Success!!!");
+      console.log('Success!!!');
       setCypherAlgorithm(() => aes);
     }
   };
@@ -72,11 +65,7 @@ const Auth: FC<{
   };
 
   return (
-    <Modal
-      visible={showModal}
-      onCancel={onCancel}
-      bodyStyle={{ height: "500px", width: "350px" }}
-    >
+    <Modal visible={showModal} onCancel={onCancel} bodyStyle={{height: '500px', width: '350px'}}>
       {authComponents[authStatus]}
     </Modal>
   );

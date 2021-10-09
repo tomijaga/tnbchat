@@ -2,31 +2,22 @@ import 'antd/dist/antd.css';
 import '../styles.css';
 import '../App.css';
 
-import {Account, AccountPaymentHandler, Bank, PaginatedTransactionEntry, Transaction} from '../thenewboston/src';
-import {FC, ReactNode, useEffect, useRef, useState} from 'react';
+import {Account, AccountPaymentHandler, Bank, PaginatedTransactionEntry} from '../thenewboston/src';
+import {useEffect, useState, useMemo} from 'react';
 
-import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';
+import {BrowserRouter as Router, Switch} from 'react-router-dom';
 import SearchOutlined from '@ant-design/icons/SearchOutlined';
-import Avatar from 'antd/es/avatar';
 import Button from 'antd/es/button';
 import Card from 'antd/es/card';
 import Col from 'antd/es/col';
-import Comment from 'antd/es/comment';
 import Form from 'antd/es/form';
 import Grid from 'antd/es/grid';
 import Input from 'antd/es/input';
-import {Layout} from 'antd';
 import Menu from 'antd/es/menu';
 import {Post} from 'components';
 import Row from 'antd/es/row';
-import Tooltip from 'antd/es/tooltip';
-import Typography from 'antd/es/typography';
-import axios from 'axios';
-import bs58 from 'bs58';
 import {encode} from 'utils';
-import isUrl from 'is-url';
 import Auth from './Auth';
-import {is} from 'date-fns/locale';
 
 const tnbchat = '06e51367ffdb5e3e3c31118596e0956a48b1ffde327974d39ce1c3d3685e30ab';
 const sk = '25d9b8e19a450706e5acf868b9d81a2b2679c1753e9fec64087fa715f94c27a3';
@@ -34,10 +25,10 @@ const bankUrl = 'http://bank.tnbexplorer.com';
 
 export default function App() {
   const [showAuth, setShowAuth] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn] = useState(false);
   const account = new Account(sk);
-  const bank = new Bank(bankUrl);
-  const [tnbpay, setTnbPay] = useState<AccountPaymentHandler>(new AccountPaymentHandler({account, bankUrl}));
+  const bank = useMemo(() => new Bank(bankUrl), []);
+  const [tnbpay] = useState<AccountPaymentHandler>(new AccountPaymentHandler({account, bankUrl}));
 
   const {useBreakpoint} = Grid;
   const screens = useBreakpoint();
@@ -57,15 +48,7 @@ export default function App() {
     }
 
     tnbpay.init();
-  }, []);
-
-  const getPosts = async () => {
-    const txs = await bank.getTransactions({
-      limit: 100,
-      recipient: tnbchat,
-    });
-    setPosts(txs.results);
-  };
+  }, [isLoggedIn, tnbpay]);
 
   const onFinish = async ({textInput}: any) => {
     if (sk) return setShowAuth(true);
@@ -97,8 +80,15 @@ export default function App() {
 
   const [posts, setPosts] = useState<PaginatedTransactionEntry[]>([]);
   useEffect(() => {
+    const getPosts = async () => {
+      const txs = await bank.getTransactions({
+        limit: 100,
+        recipient: tnbchat,
+      });
+      setPosts(txs.results);
+    };
     getPosts();
-  }, []);
+  }, [bank]);
 
   return (
     <div className="App">

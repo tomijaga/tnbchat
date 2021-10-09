@@ -24,7 +24,6 @@
     "react-router-dom": "^5.3.0",
     "react-scripts": "4.0.3",
     "scrypt-js": "^3.0.1",
-    "thenewboston": "1.1.0-alpha.4",
     "tinyurl": "^1.1.7",
     "tnb-hd-wallet": "^1.1.1",
     "typescript": "^4.4.3",
@@ -59,8 +58,10 @@
     "@types/bs58": "^4.0.1",
     "@types/is-url": "^1.2.30",
     "@types/node": "^16.10.3",
+    "@types/qrcode": "^1.4.1",
     "@types/react": "^17.0.27",
     "@types/react-dom": "^17.0.9",
+    "@types/react-redux": "^7.1.19",
     "@types/react-router-dom": "^5.3.1",
     "eslint": "^7.32.0",
     "eslint-config-airbnb": "^18.2.1",
@@ -74,9 +75,7 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "husky": "^7.0.2",
     "stylelint": "^13.13.1",
-    "stylelint-order": "^4.1.0",
-    "@types/qrcode": "^1.4.1",
-    "@types/react-redux": "^7.1.19"
+    "stylelint-order": "^4.1.0"
   },
   "husky": {
     "hooks": {

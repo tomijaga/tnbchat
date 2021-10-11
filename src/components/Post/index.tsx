@@ -1,5 +1,5 @@
 import {PaginatedTransactionEntry} from 'thenewboston/src';
-import {FC, ReactNode} from 'react';
+import {FC, ReactNode, useEffect, useState} from 'react';
 
 import Avatar from 'antd/es/avatar';
 import Button from 'antd/es/button';
@@ -13,8 +13,9 @@ import {decode} from 'utils';
 import {formatDistanceToNowStrict} from 'date-fns';
 import isUrl from 'is-url';
 import Grid from 'antd/es/grid';
+import ReactPlayer from 'react-player';
 
-const memoTextToComponent = (word: string) => {
+const memoTextToComponent = async (word: string) => {
   if (word === '') return <Typography.Text> </Typography.Text>;
   if (word) {
     if (word.startsWith('https://tinyurl.com') || word.startsWith('https://bit.ly')) {
@@ -32,6 +33,21 @@ const memoTextToComponent = (word: string) => {
     }
 
     if (isUrl(word)) {
+      if (word.endsWith('.mp4')) {
+        if (await ReactPlayer.canPlay(word))
+          return (
+            <iframe
+              width="300px"
+              height="300px"
+              src={word}
+              title="TnbChat video Player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          );
+        // return <ReactPlayer width="100%" height="100%" muted={true} loop={true} light url={word} />;
+      }
       return (
         <Typography.Link href={word} target="_blank">
           {word}
@@ -42,14 +58,14 @@ const memoTextToComponent = (word: string) => {
   return word;
 };
 
-const formatMemo = (memo: string) => {
+const formatMemo = async (memo: string) => {
   const decodedText = decode(memo);
   const formattedWords: ReactNode[] = [];
 
-  decodedText.split(' ').forEach((word: string) => {
-    formattedWords.push(memoTextToComponent(word));
+  for (const word of decodedText.split(' ')) {
+    formattedWords.push(await memoTextToComponent(word));
     formattedWords.push(' ');
-  });
+  }
 
   return formattedWords;
 };
@@ -57,6 +73,13 @@ const formatMemo = (memo: string) => {
 const {useBreakpoint} = Grid;
 export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
   const screens = useBreakpoint();
+  const [memoData, setMemoData] = useState<ReactNode[]>([]);
+  useEffect(() => {
+    formatMemo(tx.memo ?? '').then((result) => {
+      setMemoData(result);
+    });
+  }, [tx]);
+
   return (
     <Card>
       <Col span={24}>
@@ -93,7 +116,7 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                   </Col>
                 </Row>
               </Col>
-              <Col span={24}>{formatMemo(tx.memo ?? '')}</Col>
+              <Col span={24}>{memoData}</Col>
             </Row>
           </Col>
         </Row>

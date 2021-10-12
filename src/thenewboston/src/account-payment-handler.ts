@@ -4,8 +4,8 @@ import { PaymentHandler } from "./payment-handler";
 import { TransferDetails } from "./utils";
 
 export class AccountPaymentHandler {
-  private client: PaymentHandler;
-  private account: Account;
+  protected client: PaymentHandler;
+  protected account: Account;
 
   constructor({ account, bankUrl }: AccountPaymentHandlerOptions) {
     this.account = account;

@@ -1,5 +1,5 @@
 import {PaginatedTransactionEntry} from 'thenewboston/src';
-import {FC, ReactNode} from 'react';
+import {FC, ReactNode, useEffect, useState} from 'react';
 
 import Avatar from 'antd/es/avatar';
 import Button from 'antd/es/button';
@@ -13,8 +13,9 @@ import {decode} from 'utils';
 import {formatDistanceToNowStrict} from 'date-fns';
 import isUrl from 'is-url';
 import Grid from 'antd/es/grid';
+import ReactPlayer from 'react-player';
 
-const memoTextToComponent = (word: string) => {
+const memoTextToComponent = async (word: string) => {
   if (word === '') return <Typography.Text> </Typography.Text>;
   if (word) {
     if (word.startsWith('https://tinyurl.com') || word.startsWith('https://bit.ly')) {
@@ -32,6 +33,21 @@ const memoTextToComponent = (word: string) => {
     }
 
     if (isUrl(word)) {
+      if (word.endsWith('.mp4')) {
+        if (await ReactPlayer.canPlay(word))
+          return (
+            <iframe
+              width="300px"
+              height="300px"
+              src={word}
+              title="TnbChat video Player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          );
+        // return <ReactPlayer width="100%" height="100%" muted={true} loop={true} light url={word} />;
+      }
       return (
         <Typography.Link href={word} target="_blank">
           {word}
@@ -42,14 +58,14 @@ const memoTextToComponent = (word: string) => {
   return word;
 };
 
-const formatMemo = (memo: string) => {
+const formatMemo = async (memo: string) => {
   const decodedText = decode(memo);
   const formattedWords: ReactNode[] = [];
 
-  decodedText.split(' ').forEach((word: string) => {
-    formattedWords.push(memoTextToComponent(word));
+  for (const word of decodedText.split(' ')) {
+    formattedWords.push(await memoTextToComponent(word));
     formattedWords.push(' ');
-  });
+  }
 
   return formattedWords;
 };
@@ -57,23 +73,32 @@ const formatMemo = (memo: string) => {
 const {useBreakpoint} = Grid;
 export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
   const screens = useBreakpoint();
+  const [memoData, setMemoData] = useState<ReactNode[]>([]);
+  useEffect(() => {
+    formatMemo(tx.memo ?? '').then((result) => {
+      setMemoData(result);
+    });
+  }, [tx]);
+
   return (
     <Card>
       <Col span={24}>
         <Row gutter={10}>
-          <Col span={3}>
-            <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" alt="Han Solo" />
+          <Col flex={'50px'}>
+            <Avatar src={`https://robohash.org/${tx.block.sender}.png?sets=set1,set3,set4,set5`} alt="pfp" />
           </Col>
           <Col span={21}>
             <Row gutter={[10, 10]} justify="space-between" align="middle" style={{textAlign: 'left'}}>
               <Col>
                 <Row gutter={10} align="bottom">
                   <Col>
-                    <Typography.Text style={{fontSize: 'small', color: 'gray'}}>
-                      {'Henry' + tx.block.id.slice(0, 2)}
+                    <Typography.Text strong style={{fontSize: 'small', color: 'gray'}}>
+                      {'User-' + tx.block.sender.slice(0, 4)}
                     </Typography.Text>
                   </Col>
-                  <Col style={{fontSize: 'small', color: 'lightgray'}}>@{tx.block.sender.slice(0, 4)}..df12</Col>
+                  <Col style={{fontSize: 'small', color: 'lightgray'}}>
+                    @{tx.block.sender.slice(0, 4)}..{tx.block.sender.slice(-4)}
+                  </Col>
                   <Col>
                     <Tag color="gold">Gov</Tag>
                   </Col>
@@ -93,7 +118,7 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                   </Col>
                 </Row>
               </Col>
-              <Col span={24}>{formatMemo(tx.memo ?? '')}</Col>
+              <Col span={24}>{memoData}</Col>
             </Row>
           </Col>
         </Row>

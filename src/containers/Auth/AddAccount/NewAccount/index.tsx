@@ -36,7 +36,6 @@ const NewAccount = () => {
       const elem = seedPhraseAsArray[rand];
       seedPhraseAsArray = [...seedPhraseAsArray.slice(0, rand), ...seedPhraseAsArray.slice(rand + 1)];
 
-      //   console.log({elem, i, rand, seedPhraseAsArray, randomOrderSeedPhrase});
       setRandomOrderSeedPhrase((prev) => [...prev, elem]);
     }
   }, []);

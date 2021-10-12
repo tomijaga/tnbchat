@@ -53,7 +53,6 @@ export class Aes {
 
   ctrEncryption = (text: string, counter: number = 1) => {
     text = text.normalize();
-    console.log({text});
 
     // Convert text to bytes
     const textBytes = stringToBytes(text);
@@ -65,19 +64,17 @@ export class Aes {
     // To print or store the binary data, you may convert it to hex
     const encryptedHex = bytesToHex(encryptedBytes);
 
-    // console.log({ text, encryptedHex });
     return encryptedHex;
   };
 
   ctrDecryption = (encryptedHex: string, counter: number = 1) => {
     // When ready to decrypt the hex string, convert it back to bytes
     const encryptedBytes = hexToBytes(encryptedHex);
-    console.log({encryptedHex, encryptedBytes, x: Buffer.from(encryptedHex, 'hex')});
+
     // The counter mode of operation maintains internal state, so to
     // decrypt a new instance must be instantiated.
     const aesCtr = new aesjs.ModeOfOperation.ctr(this.hashInBytes, new aesjs.Counter(counter));
     const decryptedBytes = aesCtr.decrypt(encryptedBytes);
-    console.log({decryptedBytes});
 
     // Convert our bytes back into text
     const decryptedText = bytesToString(decryptedBytes);

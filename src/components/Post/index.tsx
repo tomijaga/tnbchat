@@ -84,19 +84,21 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
     <Card>
       <Col span={24}>
         <Row gutter={10}>
-          <Col span={3}>
-            <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" alt="Han Solo" />
+          <Col flex={'50px'}>
+            <Avatar src={`https://robohash.org/${tx.block.sender}.png?sets=set1,set3,set4,set5`} alt="pfp" />
           </Col>
           <Col span={21}>
             <Row gutter={[10, 10]} justify="space-between" align="middle" style={{textAlign: 'left'}}>
               <Col>
                 <Row gutter={10} align="bottom">
                   <Col>
-                    <Typography.Text style={{fontSize: 'small', color: 'gray'}}>
-                      {'Henry' + tx.block.id.slice(0, 2)}
+                    <Typography.Text strong style={{fontSize: 'small', color: 'gray'}}>
+                      {'User-' + tx.block.sender.slice(0, 4)}
                     </Typography.Text>
                   </Col>
-                  <Col style={{fontSize: 'small', color: 'lightgray'}}>@{tx.block.sender.slice(0, 4)}..df12</Col>
+                  <Col style={{fontSize: 'small', color: 'lightgray'}}>
+                    @{tx.block.sender.slice(0, 4)}..{tx.block.sender.slice(-4)}
+                  </Col>
                   <Col>
                     <Tag color="gold">Gov</Tag>
                   </Col>

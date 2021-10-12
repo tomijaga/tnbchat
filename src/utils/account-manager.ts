@@ -92,9 +92,7 @@ export class AccountManager {
 
     if (accountsData) {
       const {addresses} = accountsData;
-      console.log({addresses, accountIndex});
       const account = addresses[accountIndex];
-      console.log({account});
 
       return this.cypherAlgorithm.ctrDecryption(account.signing_key_hash);
     }

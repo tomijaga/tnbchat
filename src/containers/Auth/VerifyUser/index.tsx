@@ -19,7 +19,6 @@ const VerifyUser: FC = () => {
     const decryptedText = aes.ctrDecryption(encryptedText);
     console.log({decryptedText});
     if (decryptedText === process.env.REACT_APP_PLAIN_TEXT) {
-      console.log('Success!!!');
       dispatch(
         setAuthData({
           passwordHash: aes.hashInHex,

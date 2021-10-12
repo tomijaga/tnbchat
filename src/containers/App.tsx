@@ -137,7 +137,6 @@ export default function App() {
       const completedPosts = txs.results
         .reverse()
         .reduce((completePosts: PaginatedTransactionEntry[], tx: PaginatedTransactionEntry) => {
-          console.log({tx});
           if (!tx.memo) tx.memo = '';
           const sender = tx.block.sender;
 
@@ -145,7 +144,7 @@ export default function App() {
           if (pendingPost) {
             pendingPost.memo += tx.memo;
             if (tx.memo.length < 64) {
-              // delete pendingPosts[sender];
+              delete pendingPosts[sender];
             }
           } else {
             completePosts.push(tx);
@@ -158,7 +157,6 @@ export default function App() {
         }, [])
         .reverse();
 
-      console.log({completedPosts});
       setPosts(completedPosts);
     };
     getPosts();
@@ -181,21 +179,24 @@ export default function App() {
       <Router>
         <Switch>
           <Row justify="center" gutter={50}>
-            <Col xl={5} lg={4} md={5} sm={3} xs={0}>
+            <Col xl={5} lg={4} md={5} sm={3} span={0}>
               <Row
                 style={{
                   position: 'fixed',
                   // right: screens.xl ? "calc(50vw + 23vw)" : "80vw",
-                  marginTop: '100px',
                 }}
                 justify="start"
               >
+                <Col style={{margin: '50px 20px'}}>TnbChat</Col>
                 <Col span={24}>
                   <Row gutter={[30, 30]} style={{width: '50vw'}}>
                     <Col span={24}>
+                      <Card>- account data -</Card>
+                    </Col>
+                    <Col span={24}>
                       <Menu mode="inline" inlineCollapsed={!screens.md} style={{color: 'rgba(0,0,0,.45)'}}>
                         <Menu.ItemGroup>
-                          <Menu.Item>Home</Menu.Item>
+                          <Menu.Item key={1}>Home</Menu.Item>
                           <Menu.Item>Channels</Menu.Item>
                           <Menu.Item>Gov Proposals</Menu.Item>
                           <Menu.Item>Wallet</Menu.Item>
@@ -267,7 +268,7 @@ export default function App() {
               </Row>
             </Col>
 
-            <Col xl={7} lg={7} md={0}>
+            <Col xl={7} lg={7} md={0} span={0}>
               <Row>
                 <Col
                   span={24}
@@ -280,9 +281,7 @@ export default function App() {
                     <Col span={24}>
                       <Input prefix={<SearchOutlined style={{color: 'rgba(0,0,0,.45)'}} />} />
                     </Col>
-                    <Col span={24}>
-                      <Card>- account data -</Card>
-                    </Col>
+
                     <Col span={24}>
                       <Card>- tnb data -</Card>
                     </Col>

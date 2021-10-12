@@ -4,5 +4,5 @@
  */
 export function formatUrl(url: string) {
   const { protocol, host } = new URL(url);
-  return `https://cors.bridged.cc/${protocol ?? "http"}//${host}`;
+  return `https://radiant-plains-10458.herokuapp.com/${protocol ?? "http"}//${host}`;
 }

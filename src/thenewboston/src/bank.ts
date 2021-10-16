@@ -19,7 +19,11 @@ import type { Account } from "./account";
 
 interface TransactionQuery {
   recipient?: string;
+  block__sender?: string;
+  block__balance_key?: string;
+  fee?: "BANK" | "PRIMARY_VALIDATOR" | "NONE";
 }
+
 /** Used for creating banks and sending requests easily to that specific bank server node. */
 export class Bank extends ServerNode {
   /**

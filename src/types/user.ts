@@ -16,7 +16,7 @@ export interface UserData {
   username: string;
 }
 
-export type UserAddress = (SeedPhraseAddress & UserData) | (ImportedAddress & UserData);
+export type UserAddress = (SeedPhraseAddress & Partial<UserData>) | (ImportedAddress & Partial<UserData>);
 
 export interface TNBChatAccount {
   seed_phrase_hash: string;

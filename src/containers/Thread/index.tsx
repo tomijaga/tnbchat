@@ -15,7 +15,7 @@ import Grid from 'antd/es/grid';
 import {getPost} from 'api';
 import {mainnetBank, testnetBank} from 'api/node';
 import {UserData} from 'types';
-import {PaginatedTransactionEntry} from 'thenewboston/src';
+import {PaginatedTransactionEntry} from 'packages/thenewboston/src';
 
 interface ThreadParam {
   balance_key: string;

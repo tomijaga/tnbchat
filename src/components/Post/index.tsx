@@ -1,5 +1,5 @@
-import {PaginatedTransactionEntry} from 'thenewboston/src';
 import {FC, ReactNode, useEffect, useState} from 'react';
+import {useHistory} from 'react-router-dom';
 
 import Avatar from 'antd/es/avatar';
 import Button from 'antd/es/button';
@@ -9,92 +9,155 @@ import Row from 'antd/es/row';
 import Tag from 'antd/es/tag';
 import MoreOutlined from '@ant-design/icons/MoreOutlined';
 import Typography from 'antd/es/typography';
-import {decode} from 'utils';
-import {format as formatDate, formatDistanceToNowStrict} from 'date-fns';
+import {decodePostMessage, getPfp} from 'utils';
+import {format as formatDate, formatDistanceToNowStrict, compareAsc, sub as subtractFromDate} from 'date-fns';
 import isUrl from 'is-url';
 import Grid from 'antd/es/grid';
 import ReactPlayer from 'react-player';
 import Tooltip from 'antd/es/tooltip';
 
-import CommentOutlined from '@ant-design/icons/CommentOutlined';
-import LikeOutlined from '@ant-design/icons/LikeOutlined';
-import DislikeOutlined from '@ant-design/icons/DislikeOutlined';
+import {PaginatedTransactionEntry} from 'packages/thenewboston/src';
 
-import {ReactComponent as TnbLogo} from 'assets/tnb3.svg';
-import Icon from '@ant-design/icons/lib/components/Icon';
+// import CommentOutlined from '@ant-design/icons/CommentOutlined';
+// import LikeOutlined from '@ant-design/icons/LikeOutlined';
+// import DislikeOutlined from '@ant-design/icons/DislikeOutlined';
+
+import {AccountNumber} from 'components';
+
+// import {ReactComponent as TnbLogo} from 'assets/tnb3.svg';
+// import Icon from '@ant-design/icons/lib/components/Icon';
 import {Link} from 'react-router-dom';
-
-const memoTextToComponent = async (word: string) => {
-  if (word === '') return <Typography.Text> </Typography.Text>;
-  if (word) {
-    if (word.startsWith('https://tinyurl.com') || word.startsWith('https://bit.ly')) {
-      return (
-        <img
-          style={{
-            width: '300px',
-            height: '300px',
-            objectFit: 'scale-down',
-          }}
-          alt={word}
-          src={word}
-        />
-      );
-    }
-
-    if (isUrl(word)) {
-      if (word.endsWith('.mp4')) {
-        if (await ReactPlayer.canPlay(word))
-          return (
-            <iframe
-              width="300px"
-              height="300px"
-              src={word}
-              title="TnbChat video Player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          );
-        // return <ReactPlayer width="100%" height="100%" muted={true} loop={true} light url={word} />;
-      }
-      return (
-        <Typography.Link href={word} target="_blank">
-          {word}
-        </Typography.Link>
-      );
-    }
-  }
-  return word;
-};
-
-const formatMemo = async (memo: string) => {
-  const decodedText = decode(memo);
-  const formattedWords: ReactNode[] = [];
-
-  for (const word of decodedText.split(' ')) {
-    formattedWords.push(await memoTextToComponent(word));
-    formattedWords.push(' ');
-  }
-
-  return formattedWords;
-};
+import axios from 'packages/thenewboston/node_modules/axios';
 
 const {useBreakpoint} = Grid;
 export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
+  const history = useHistory();
   const screens = useBreakpoint();
   const [memoData, setMemoData] = useState<ReactNode[]>([]);
+  const profilePageUrl = `/accounts/${tx.block.sender}`;
+
   useEffect(() => {
     formatMemo(tx.memo ?? '').then((result) => {
       setMemoData(result);
     });
   }, [tx]);
 
+  // const isImage = async (url: string) => {
+  //   const promise = new Promise<boolean>((resolve, reject) => {
+  //     let img = new Image(300, 300);
+  //     img.onload = () => resolve(true);
+  //     img.onerror = () => reject();
+  //     img.src = url;
+  //     img.alt = url;
+  //   });
+
+  //   return promise;
+  // };
+
+  // const isVideo;
+  const embedUrl = async (url: string) => {
+    try {
+      const urlData = await axios.get(url);
+
+      const {
+        headers: {'content-type': contentType},
+        request: {responseURL},
+      } = urlData;
+      if (contentType.includes('image')) {
+        return (
+          <img
+            style={{
+              width: '300px',
+              height: '300px',
+              objectFit: 'scale-down',
+            }}
+            alt={responseURL}
+            src={responseURL}
+          />
+        );
+      } else if (contentType.includes('video')) {
+        return (
+          <iframe
+            width="300px"
+            height="300px"
+            src={responseURL}
+            title="video Player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        );
+      } else {
+        return (
+          <Typography.Link href={url} target="_blank">
+            {responseURL}
+          </Typography.Link>
+        );
+      }
+    } catch {
+      return <Typography.Text>{url}</Typography.Text>;
+    }
+  };
+
+  const formatMemo = async (memo: string) => {
+    const decodedText = decodePostMessage(memo);
+    const formattedWords: ReactNode[] = [];
+
+    let paragraph = '';
+
+    for (const word of decodedText.split(' ')) {
+      if (word.includes('\n')) {
+        const splitWords = word.split('\n');
+        splitWords.forEach((splitWord, i) => {
+          if (i < splitWords.length - 1) {
+            formattedWords.push(<Typography.Paragraph>{paragraph + splitWord}</Typography.Paragraph>);
+            paragraph = '';
+          } else {
+            paragraph = splitWord;
+          }
+        });
+      } else {
+        if (isUrl(word)) {
+          // console.log(word, 'is Url');
+          formattedWords.push(<Typography.Text>{paragraph + ' '}</Typography.Text>);
+          formattedWords.push(await embedUrl(word));
+
+          paragraph = ' ';
+        } else {
+          paragraph = paragraph.concat(' ', word);
+        }
+      }
+    }
+
+    formattedWords.push(<Typography.Text>{paragraph}</Typography.Text>);
+    return formattedWords;
+  };
+
+  const formatDateOnPost = () => {
+    // If the date is more than 1 day
+    const postsDate = new Date(tx.block.modified_date);
+
+    if (compareAsc(subtractFromDate(new Date(Date.now()), {days: 1}), postsDate) === 1) {
+      if (compareAsc(subtractFromDate(new Date(Date.now()), {years: 1}), postsDate) === 1) {
+        return formatDate(postsDate, 'MMM d, yyyy');
+      }
+      return formatDate(postsDate, 'MMM d');
+    }
+
+    return formatDistanceToNowStrict(postsDate)
+      .replaceAll(/hours|hour/gi, 'h')
+      .replaceAll(/minutes|minute/gi, 'm')
+      .replaceAll(/seconds|second/gi, 's')
+      .replaceAll(' ', '');
+  };
+
   return (
     // <Link to={`/${tx.block.sender}/post/${tx.block.balance_key}`} style={{zIndex: 0}}>
     <Card
+      size={screens.xs ? 'small' : 'default'}
       id="post"
       onClick={(e) => {
-        // window.location.href = `/posts/${tx.block.balance_key}`;
+        // history.push(`/posts/${tx.block.balance_key}`);
       }}
     >
       <Row gutter={10}>
@@ -103,21 +166,21 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
             onClick={(e) => {
               e.stopPropagation();
             }}
-            to={`/${tx.block.sender}`}
+            to={profilePageUrl}
           >
-            <Avatar src={`https://robohash.org/${tx.block.sender}.png?sets=set1,set3,set4,set5`} alt="pfp" />
+            <Avatar style={{background: 'rgba(0,0,0, 0.05)'}} src={getPfp(tx.block.sender)} alt="pfp" />
           </Link>
         </Col>
-        <Col span={21}>
-          <Row gutter={[10, 10]} justify="space-between" align="middle" style={{textAlign: 'left'}}>
-            <Col>
+        <Col style={{width: 'calc(100% - 50px )'}}>
+          <Row gutter={screens.xs ? [5, 5] : [10, 10]} justify="space-between" align="top" style={{textAlign: 'left'}}>
+            <Col span={16}>
               <Row gutter={10} align="bottom">
                 <Col>
                   <Link
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
-                    to={`/${tx.block.sender}`}
+                    to={profilePageUrl}
                   >
                     <Typography.Text strong style={{color: 'gray'}}>
                       {'User-' + tx.block.sender.slice(0, 4)}
@@ -130,9 +193,7 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                   }}
                   style={{color: 'lightgray'}}
                 >
-                  <Tooltip overlayInnerStyle={{fontSize: 'smaller'}} title={'Copy Address'}>
-                    @{tx.block.sender.slice(0, 4)}..{tx.block.sender.slice(-4)}
-                  </Tooltip>
+                  <AccountNumber accountNumber={tx.block.sender} />
                 </Col>
                 <Col>
                   <Tag
@@ -146,8 +207,11 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                 </Col>
               </Row>
             </Col>
-            <Col>
-              <Row gutter={screens.xs ? 5 : 40} align="bottom">
+            <Col
+              //  md={6} sm={7}
+              xs={{flex: '100px'}}
+            >
+              <Row align="top" justify="space-between">
                 <Col
                   onClick={(e) => {
                     e.stopPropagation();
@@ -157,16 +221,12 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                   <Tooltip
                     overlayInnerStyle={{fontSize: 'smaller'}}
                     placement="bottom"
-                    title={formatDate(new Date(tx.block.modified_date), "h':'m aa '⁃' MMM d, yyyy  ")}
+                    title={formatDate(new Date(tx.block.modified_date), "h':'m aa '⁃' MMM d, yyyy")}
                   >
-                    {formatDistanceToNowStrict(new Date(tx.block.modified_date))
-                      .replaceAll(/hour(s)/g, 'h')
-                      .replaceAll(/minute(s)/gi, 'm')
-                      .replaceAll(/second(s)/g, 's')
-                      .replaceAll(' ', '')}
+                    <Typography.Text style={{fontSize: 'small'}}>{formatDateOnPost()}</Typography.Text>
                   </Tooltip>
                 </Col>
-                <Col>
+                {/* <Col>
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -176,12 +236,14 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                     type="text"
                     icon={<MoreOutlined />}
                   />
-                </Col>
+                </Col> */}
               </Row>
             </Col>
             <Col span={24}>{memoData}</Col>
+
+            {/* {action} */}
             <Col>
-              <Row gutter={20} align="middle" justify="space-between">
+              {/* <Row gutter={20} align="middle" justify="space-between">
                 <Col style={{marginLeft: '-10px'}}>
                   <Tooltip overlayInnerStyle={{fontSize: 'smaller'}} placement="bottomLeft" title="Like">
                     <Button
@@ -243,6 +305,7 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                   </Tooltip>
                 </Col>
               </Row>
+            */}
             </Col>
           </Row>
         </Col>

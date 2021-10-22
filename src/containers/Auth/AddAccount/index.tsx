@@ -1,48 +1,69 @@
-import {FC} from 'react';
+import {FC, useEffect} from 'react';
 import Col from 'antd/es/col';
 import Button from 'antd/es/button';
 import Row from 'antd/es/row';
 import Form from 'antd/es/form';
-import {Input} from 'antd';
-import {Aes} from 'utils';
+import {Input, message} from 'antd';
 import {useDispatch, useSelector} from 'react-redux';
-import {getAuthData} from 'selectors';
-import {setAuthData} from 'store/app';
+import {getAuthData, getUserAccounts} from 'selectors';
+import {Account} from 'packages/thenewboston/src';
+
+import {setStateAuthData} from 'store/app';
 import {AuthStatus} from 'types';
-import {AccountManager} from 'utils/account-manager';
 
 import NewAccount from './NewAccount';
+import {importAccount} from 'dispatchers/account';
+import {verifyAuth} from 'dispatchers/auth';
+import {hexPattern} from 'utils';
 
 export const AddAccount: FC = () => {
   const dispatch = useDispatch();
-  const {authStatus, passwordHash} = useSelector(getAuthData);
+  const {
+    state: {authStatus},
+  } = useSelector(getAuthData);
+
+  const accounts = useSelector(getUserAccounts);
 
   const importForm = () => {
-    const handleAccountImport = ({signingKey, username}: any) => {
+    const handleAccountImport = ({signingKey}: any) => {
       if (!signingKey || signingKey.length < 64) throw new Error('Signing Key is Invalid');
 
-      if (passwordHash === null)
-        return dispatch(
-          setAuthData({
-            authStatus: AuthStatus.verify_password,
+      if (dispatch(verifyAuth)) {
+        dispatch(importAccount({signingKey}));
+        dispatch(
+          setStateAuthData({
+            showAuthModal: false,
           }),
         );
-
-      const signing_key_hash = new Aes({hash: passwordHash}).ctrEncryption(signingKey);
-
-      const accountManager = new AccountManager({hash: passwordHash});
-
-      accountManager.importAddress(signing_key_hash, username);
+      }
     };
 
     return (
       <Form onFinish={handleAccountImport}>
-        <Form.Item label={'Signing Key'} name={'signingKey'}>
+        <Form.Item
+          requiredMark={false}
+          label={'Signing Key'}
+          name={'signingKey'}
+          rules={[
+            {len: 64, message: 'Signing Key must have 64 character'},
+            {pattern: hexPattern, message: 'Singing Key must be in hex format'},
+            {required: true, message: 'Singing Key is Required'},
+            {
+              validator: (_, signingKey) => {
+                const acc = new Account(signingKey);
+                if (accounts[acc.accountNumberHex]) {
+                  return Promise.reject(new Error('This account already exists'));
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
+        >
           <Input.Password />
         </Form.Item>
-        <Form.Item label={'Username'} name={'username'}>
+        {/* <Form.Item label={'Username'} name={'username'}>
           <Input />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item>
           <Button htmlType="submit">Import Account</Button>
         </Form.Item>

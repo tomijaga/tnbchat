@@ -6,3 +6,7 @@ export enum Network {
   testnet = 'testnet',
   mainnet = 'mainnet',
 }
+
+export interface Dict<T> {
+  [x: string]: T;
+}

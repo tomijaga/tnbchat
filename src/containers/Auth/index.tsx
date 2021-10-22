@@ -1,7 +1,7 @@
 import {FC, useEffect} from 'react';
 import Modal from 'antd/es/modal';
 import {useDispatch, useSelector} from 'react-redux';
-import {setAuthData} from 'store/app';
+import {setStateAuthData} from 'store/app';
 import {getAuthData} from 'selectors';
 
 import AddAccount from './AddAccount';
@@ -15,13 +15,15 @@ const Auth: FC<{
   onCancel: () => void;
 }> = () => {
   const dispatch = useDispatch();
-  const {isLoggedIn, showAuthModal, authStatus} = useSelector(getAuthData);
+  const {
+    state: {isLoggedIn, showAuthModal, authStatus},
+  } = useSelector(getAuthData);
 
   useEffect(() => {
     if (!isLoggedIn) {
       if (localStorage.getItem('encrypted_text')) {
         dispatch(
-          setAuthData({
+          setStateAuthData({
             showAuthModal: true,
             authStatus: AuthStatus.verify_password,
           }),
@@ -47,14 +49,21 @@ const Auth: FC<{
 
   const closeAuthModal = () => {
     dispatch(
-      setAuthData({
+      setStateAuthData({
         showAuthModal: false,
       }),
     );
   };
 
   return (
-    <Modal visible={showAuthModal} onCancel={closeAuthModal} bodyStyle={{height: '500px', width: '350px'}}>
+    <Modal
+      centered
+      visible={showAuthModal}
+      destroyOnClose
+      onCancel={closeAuthModal}
+      bodyStyle={{height: '500px', width: '350px'}}
+      footer={null}
+    >
       {selectAuthComponents()}
     </Modal>
   );

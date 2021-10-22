@@ -1,5 +1,5 @@
 import {MAINNET_GENERAL_CHANNEL, TESTNET_GENERAL_CHANNEL} from 'constant';
-import {PaginatedTransactionEntry} from 'thenewboston/src';
+import {PaginatedTransactionEntry} from 'packages/thenewboston/src';
 import {testnetBank} from './node';
 import {Network} from 'types';
 

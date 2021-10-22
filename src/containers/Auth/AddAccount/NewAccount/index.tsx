@@ -7,16 +7,19 @@ import Typography from 'antd/es/typography';
 import {nanoid} from 'nanoid';
 import {useDispatch, useSelector} from 'react-redux';
 import {getAuthData} from 'selectors';
-import {setAuthData} from 'store/app';
+import {setStateAuthData} from 'store/app';
 
 import {AuthStatus} from 'types';
 
 import {generateMnemonic} from 'tnb-hd-wallet';
-import {AccountManager} from 'utils/account-manager';
+import {verifyAuth} from 'dispatchers/auth';
+import {createSeedPhrase} from 'dispatchers/account';
 
 const NewAccount = () => {
   const dispatch = useDispatch();
-  const {passwordHash} = useSelector(getAuthData);
+  const {
+    session: {appEncryptedUserPasswordHash},
+  } = useSelector(getAuthData);
 
   const [seedPhrase, setSeedPhrase] = useState<string>('');
   const [verifyNow, setVerifyNow] = useState(false);
@@ -42,25 +45,13 @@ const NewAccount = () => {
 
   useEffect(() => {
     if (seedPhrase && selectedWordsArray.join(' ') === seedPhrase) {
-      if (passwordHash !== null) {
-        const accountManager = new AccountManager({hash: passwordHash});
-        accountManager.addSeedPhrase(seedPhrase, `User ${nanoid()}`);
-      } else {
-        dispatch(
-          setAuthData({
-            authStatus: AuthStatus.verify_password,
-          }),
-        );
-      }
+      if (dispatch(verifyAuth)) {
+        dispatch(createSeedPhrase(seedPhrase));
 
-      dispatch(
-        setAuthData({
-          showAuthModal: false,
-          authStatus: AuthStatus.none,
-        }),
-      );
+        dispatch(setStateAuthData({showAuthModal: false}));
+      }
     }
-  }, [selectedWordsArray, dispatch, passwordHash, seedPhrase]);
+  }, [selectedWordsArray, dispatch, appEncryptedUserPasswordHash, seedPhrase]);
 
   const removeIndex = (arr: any[], index: number) => {
     return [...arr.slice(0, index), ...arr.slice(index + 1)];

@@ -5,12 +5,12 @@ import {
   PaymentHandler,
   PaginatedBlockEntry,
   PaginatedEntryMetadata,
-} from 'thenewboston/src';
+} from 'packages/thenewboston/src';
 import {MAINNET_BANK_URL, TESTNET_BANK_URL} from 'constant';
 import {nanoid} from 'nanoid';
 
 type Network = 'mainnet' | 'testnet';
-export class TNBChatAccount extends AccountPaymentHandler {
+export class TNBChatAccountManager extends AccountPaymentHandler {
   public network: Network;
 
   constructor(signingKey: string, network: Network = 'testnet') {
@@ -29,13 +29,7 @@ export class TNBChatAccount extends AccountPaymentHandler {
    */
 
   async makePost(memo: string, channel: string): Promise<PaginatedTransactionEntry> {
-    let block: PaginatedBlockEntry & PaginatedEntryMetadata;
-    if (memo.length >= 64) {
-      block = await this.sendCoins(channel, 1, memo.slice(0, 64));
-      await this.sendCoins(channel, 1, memo.slice(64));
-    } else {
-      block = await this.sendCoins(channel, 1, memo);
-    }
+    const block = await this.sendCoins(channel, 1, memo);
 
     return {
       recipient: channel,

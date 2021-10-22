@@ -1,28 +1,34 @@
-export interface SeedPhraseAddress extends Address {
+export interface Account {
+  account_number: string;
+  encrypted_signing_key: string;
+}
+
+export interface SeedPhraseAccount extends Account {
   is_derived: true;
   path: string;
 }
 
-export interface ImportedAddress extends Address {
+export interface ImportedAccount extends Account {
   is_derived: false;
-}
-
-export interface Address {
-  account_number: string;
-  signing_key_hash: string;
 }
 
 export interface UserData {
   username: string;
+
+  //profile picture
+  pfp: string;
+  mainnet_balance: number;
+  testnet_balance: number;
 }
 
-export type UserAddress = (SeedPhraseAddress & Partial<UserData>) | (ImportedAddress & Partial<UserData>);
+export type UserAccount = (SeedPhraseAccount & Partial<UserData>) | (ImportedAccount & Partial<UserData>);
 
 export interface TNBChatAccount {
   seed_phrase_hash: string;
+  selected_index?: number;
 
-  // We need this because both the derived and imported addresses are kept in the same array
+  // We need this because both the derived and imported accounts are kept in the same array
   // When deriving new accounts we will be able to calculate how many have already been derived
-  num_of_imported_addresses: number;
-  addresses: UserAddress[];
+  num_of_imported_accounts: number;
+  accounts: UserAccount[];
 }

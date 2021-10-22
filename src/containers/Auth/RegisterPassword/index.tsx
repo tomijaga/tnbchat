@@ -2,18 +2,11 @@ import {FC} from 'react';
 import Form from 'antd/es/form';
 import Input from 'antd/es/input';
 import Button from 'antd/es/button';
-import {useDispatch, useSelector} from 'react-redux';
-import {setStateAuthData} from 'store/app';
-import {getAuthData} from 'selectors';
-import {Aes} from 'utils';
-import {AuthStatus} from 'types';
+import {useDispatch} from 'react-redux';
 import {registerPassword} from 'dispatchers/auth';
 
 const RegisterPassword: FC = () => {
   const dispatch = useDispatch();
-  const {
-    state: {authStatus},
-  } = useSelector(getAuthData);
 
   const handleCreatePasswordForm = ({password}: any) => {
     /**

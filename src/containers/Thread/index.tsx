@@ -1,20 +1,10 @@
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
-import Image from 'antd/es/image';
-import Tabs from 'antd/es/tabs';
-import Tooltip from 'antd/es/tooltip';
-
-import Card from 'antd/es/card';
-import Button from 'antd/es/button';
 
 import Col from 'antd/es/col';
-import Typography from 'antd/es/typography';
 import {Post} from 'components';
 import Row from 'antd/es/row';
-import Grid from 'antd/es/grid';
 import {getPost} from 'api';
-import {mainnetBank, testnetBank} from 'api/node';
-import {UserData} from 'types';
 import {PaginatedTransactionEntry} from 'packages/thenewboston/src';
 
 interface ThreadParam {

@@ -1,5 +1,5 @@
 import {PayloadAction} from '@reduxjs/toolkit';
-import {LocalStorageData, LocalStorageKeys, SessionStorageKeys, TNBChatAccount, UserAccount} from 'types';
+import {LocalStorageKeys, SessionStorageKeys} from 'types';
 import {localStore, sessionStore} from './storage';
 
 const partialMapUpdater = (object: any, objectWithUpdatedValues: any, callback?: (key: string, value: any) => void) => {

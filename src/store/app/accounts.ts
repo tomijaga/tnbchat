@@ -1,7 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {USER_ACCOUNTS} from 'constant';
-import {AuthData, TNBChatAccount, UserAccount, Dict} from 'types';
-import {setPartialStateReducer} from 'utils';
+import {UserAccount, Dict} from 'types';
 import {localStore} from 'utils/storage';
 import {setLocalAndPartialStateReducer, clearLocalAndStateReducer, unsetLocalAndStateReducer} from 'utils/store';
 

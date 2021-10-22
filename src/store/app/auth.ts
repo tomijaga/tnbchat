@@ -1,4 +1,4 @@
-import {combineReducers, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {combineReducers, createSlice} from '@reduxjs/toolkit';
 import {AUTH} from 'constant';
 import {AuthData, AuthStateData, LocalAuthData, SessionAuthData} from 'types/store';
 import {

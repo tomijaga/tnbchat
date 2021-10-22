@@ -1,5 +1,5 @@
 import {setStateAuthData, setLocalAuthData, setSessionAuthData} from 'store/app';
-import {AppDispatch, AuthStatus, LocalAuthData, RootState} from 'types';
+import {AppDispatch, AuthStatus, RootState} from 'types';
 import {Aes} from 'utils';
 
 const lockApp = (dispatch: AppDispatch, getState: () => RootState) => {

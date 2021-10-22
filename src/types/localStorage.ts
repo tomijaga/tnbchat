@@ -1,6 +1,5 @@
 import {UserAccount, Dict} from 'types';
 import {LocalAuthData, SessionAuthData} from './store';
-import {USER_ACCOUNTS} from 'constant';
 
 export interface LocalStorageData {
   auth: LocalAuthData;

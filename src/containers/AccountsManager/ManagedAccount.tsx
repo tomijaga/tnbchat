@@ -45,7 +45,7 @@ export const ManagedAccount: FC<{userAccount: UserAccount}> = ({
 
       <Row gutter={10} align="middle" style={{fontSize: screens.sm ? 'small' : 'small'}}>
         <Col>
-          <img width={screens.sm ? '50px' : '30px'} src={getPfp(accountNumber)} />
+          <img width={screens.sm ? '50px' : '30px'} src={getPfp(accountNumber)} alt="profile" />
         </Col>
 
         <Col span={7} sm={7} xs={10}>

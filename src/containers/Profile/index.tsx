@@ -1,14 +1,12 @@
 import {ReactNode, useEffect, useState} from 'react';
-import {useParams, useHistory} from 'react-router-dom';
+import {useParams} from 'react-router-dom';
 import Image from 'antd/es/image';
 import Tabs from 'antd/es/tabs';
-import Tooltip from 'antd/es/tooltip';
 
 import Card from 'antd/es/card';
 import Button from 'antd/es/button';
 
 import Col from 'antd/es/col';
-import Typography from 'antd/es/typography';
 
 import {useDispatch, useSelector} from 'react-redux';
 import {getUserAccount, getUserAccounts} from 'selectors';
@@ -22,12 +20,7 @@ import {mainnetBank, testnetBank} from 'api/node';
 import {UserData} from 'types';
 import {PaginatedTransactionEntry} from 'packages/thenewboston/src';
 import {getPfp} from 'utils';
-import {
-  fetchAndStoreAccountBalance,
-  removeUserAccount,
-  storeAccountCoins,
-  switchUserAccount,
-} from 'dispatchers/account';
+import {fetchAndStoreAccountBalance, storeAccountCoins, switchUserAccount} from 'dispatchers/account';
 
 const {TabPane} = Tabs;
 const {useBreakpoint} = Grid;
@@ -47,7 +40,6 @@ interface ProfileData extends UserData {
 const Profile = () => {
   let accountNumber = useParams<ProfileParams>().account_number;
 
-  const history = useHistory();
   const dispatch = useDispatch();
   const currUserAccount = useSelector(getUserAccount);
   const accounts = useSelector(getUserAccounts);
@@ -73,9 +65,8 @@ const Profile = () => {
       });
 
       if (profileIsOwnedByUser) {
-        await dispatch(fetchAndStoreAccountBalance(accountNumber));
+        dispatch(fetchAndStoreAccountBalance(accountNumber));
 
-        const currAccount = accounts[accountNumber];
         setProfileData({
           username,
         });
@@ -93,7 +84,7 @@ const Profile = () => {
     };
 
     getUserAccountInfo();
-  }, [accountNumber, profileIsOwnedByUser]);
+  }, [accountNumber, profileIsOwnedByUser, dispatch]);
 
   const renderProfileButtons = () => {
     let components: ReactNode;

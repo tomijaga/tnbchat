@@ -1,11 +1,4 @@
-import {
-  Account,
-  AccountPaymentHandler,
-  PaginatedTransactionEntry,
-  PaymentHandler,
-  PaginatedBlockEntry,
-  PaginatedEntryMetadata,
-} from 'packages/thenewboston/src';
+import {Account, AccountPaymentHandler, PaginatedTransactionEntry, PaymentHandler} from 'packages/thenewboston/src';
 import {MAINNET_BANK_URL, TESTNET_BANK_URL} from 'constant';
 import {nanoid} from 'nanoid';
 

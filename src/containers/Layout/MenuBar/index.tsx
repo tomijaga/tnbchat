@@ -4,8 +4,6 @@ import Card from 'antd/es/card';
 import Col from 'antd/es/col';
 import Dropdown from 'antd/es/dropdown';
 
-import Grid from 'antd/es/grid';
-
 import Menu from 'antd/es/menu';
 import Row from 'antd/es/row';
 import CaretDownOutlined from '@ant-design/icons/CaretDownOutlined';
@@ -15,19 +13,14 @@ import {DeleteAccountModal} from 'components';
 import GettingStarted from './gettingStarted';
 import {useDispatch, useSelector} from 'react-redux';
 import {setStateAuthData} from 'store/app';
-import {removeUserAccount, verifyAuth} from 'dispatchers';
+import {verifyAuth} from 'dispatchers';
 import {getUserAccount, getUserAccounts, getAuthData} from 'selectors';
 
 import {getPfp} from 'utils';
 import {AuthStatus} from 'types';
-import Modal from 'antd/es/modal';
 import Typography from 'antd/es/typography';
 
-const {useBreakpoint} = Grid;
-
 const MenuBar = () => {
-  const screens = useBreakpoint();
-
   const history = useHistory();
   const dispatch = useDispatch();
   const {

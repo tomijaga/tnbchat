@@ -1,6 +1,5 @@
-import {useEffect, useState, useCallback} from 'react';
+import {useEffect, useState} from 'react';
 
-import {useHistory} from 'react-router-dom';
 import Button from 'antd/es/button';
 import Card from 'antd/es/card';
 import Col from 'antd/es/col';
@@ -19,22 +18,18 @@ import {setStateAuthData} from 'store/app';
 import {getAuthData, getUserAccount, getUserAccountManager} from 'selectors';
 
 import {encodePostMessage} from 'utils';
-import {AuthStatus, LocalAuthData} from 'types';
-import {TNBChatAccountManager} from 'utils/app';
-import {localStore} from 'utils/storage';
+import {AuthStatus} from 'types';
 
 import {verifyAuth} from 'dispatchers/auth';
-import {mainnetBank} from 'api/node';
 
 const Home = () => {
   const tnbchat = '06e51367ffdb5e3e3c31118596e0956a48b1ffde327974d39ce1c3d3685e30ab';
 
-  const history = useHistory();
   const dispatch = useDispatch();
   const account = useSelector(getUserAccount);
 
   const {
-    state: {isLoggedIn, showAuthModal, hasCreatedSeedPhrase},
+    state: {hasCreatedSeedPhrase},
   } = useSelector(getAuthData);
 
   const tnbChatAccountManager = useSelector(getUserAccountManager);

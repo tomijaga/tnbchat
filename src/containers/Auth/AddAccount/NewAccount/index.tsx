@@ -4,12 +4,9 @@ import Button from 'antd/es/button';
 import Tag from 'antd/es/tag';
 
 import Typography from 'antd/es/typography';
-import {nanoid} from 'nanoid';
 import {useDispatch, useSelector} from 'react-redux';
 import {getAuthData} from 'selectors';
 import {setStateAuthData} from 'store/app';
-
-import {AuthStatus} from 'types';
 
 import {generateMnemonic} from 'tnb-hd-wallet';
 import {verifyAuth} from 'dispatchers/auth';

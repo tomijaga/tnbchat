@@ -5,5 +5,6 @@
 export function formatUrl(url: string) {
   const { protocol, host } = new URL(url);
   const cors = "https://radiant-taiga-39526.herokuapp.com";
+
   return `${cors}/${protocol ?? "http"}//${host}`;
 }

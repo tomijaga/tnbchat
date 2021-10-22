@@ -1,19 +1,19 @@
-import {FC, ReactNode, useEffect, useState} from 'react';
-import {useHistory} from 'react-router-dom';
+import {FC, ReactNode, useEffect, useState, useCallback} from 'react';
+// import {useHistory} from 'react-router-dom';
 
 import Avatar from 'antd/es/avatar';
-import Button from 'antd/es/button';
+// import Button from 'antd/es/button';
 import Card from 'antd/es/card';
 import Col from 'antd/es/col';
 import Row from 'antd/es/row';
 import Tag from 'antd/es/tag';
-import MoreOutlined from '@ant-design/icons/MoreOutlined';
+// import MoreOutlined from '@ant-design/icons/MoreOutlined';
 import Typography from 'antd/es/typography';
 import {decodePostMessage, getPfp} from 'utils';
 import {format as formatDate, formatDistanceToNowStrict, compareAsc, sub as subtractFromDate} from 'date-fns';
 import isUrl from 'is-url';
 import Grid from 'antd/es/grid';
-import ReactPlayer from 'react-player';
+// import ReactPlayer from 'react-player';
 import Tooltip from 'antd/es/tooltip';
 
 import {PaginatedTransactionEntry} from 'packages/thenewboston/src';
@@ -31,30 +31,11 @@ import axios from 'packages/thenewboston/node_modules/axios';
 
 const {useBreakpoint} = Grid;
 export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
-  const history = useHistory();
+  // const history = useHistory();
   const screens = useBreakpoint();
   const [memoData, setMemoData] = useState<ReactNode[]>([]);
   const profilePageUrl = `/accounts/${tx.block.sender}`;
 
-  useEffect(() => {
-    formatMemo(tx.memo ?? '').then((result) => {
-      setMemoData(result);
-    });
-  }, [tx]);
-
-  // const isImage = async (url: string) => {
-  //   const promise = new Promise<boolean>((resolve, reject) => {
-  //     let img = new Image(300, 300);
-  //     img.onload = () => resolve(true);
-  //     img.onerror = () => reject();
-  //     img.src = url;
-  //     img.alt = url;
-  //   });
-
-  //   return promise;
-  // };
-
-  // const isVideo;
   const embedUrl = async (url: string) => {
     try {
       const urlData = await axios.get(url);
@@ -99,7 +80,7 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
     }
   };
 
-  const formatMemo = async (memo: string) => {
+  const formatMemo = useCallback(async (memo: string) => {
     const decodedText = decodePostMessage(memo);
     const formattedWords: ReactNode[] = [];
 
@@ -108,14 +89,14 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
     for (const word of decodedText.split(' ')) {
       if (word.includes('\n')) {
         const splitWords = word.split('\n');
-        splitWords.forEach((splitWord, i) => {
-          if (i < splitWords.length - 1) {
+        for (const splitWord of splitWords) {
+          if (splitWord !== splitWords[splitWords.length - 1]) {
             formattedWords.push(<Typography.Paragraph>{paragraph + splitWord}</Typography.Paragraph>);
             paragraph = '';
           } else {
             paragraph = splitWord;
           }
-        });
+        }
       } else {
         if (isUrl(word)) {
           // console.log(word, 'is Url');
@@ -131,7 +112,7 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
 
     formattedWords.push(<Typography.Text>{paragraph}</Typography.Text>);
     return formattedWords;
-  };
+  }, []);
 
   const formatDateOnPost = () => {
     // If the date is more than 1 day
@@ -150,6 +131,12 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
       .replaceAll(/seconds|second/gi, 's')
       .replaceAll(' ', '');
   };
+
+  useEffect(() => {
+    formatMemo(tx.memo ?? '').then((result) => {
+      setMemoData(result);
+    });
+  }, [tx, formatMemo]);
 
   return (
     // <Link to={`/${tx.block.sender}/post/${tx.block.balance_key}`} style={{zIndex: 0}}>

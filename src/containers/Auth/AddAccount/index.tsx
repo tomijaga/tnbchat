@@ -1,9 +1,9 @@
-import {FC, useEffect} from 'react';
+import {FC} from 'react';
 import Col from 'antd/es/col';
 import Button from 'antd/es/button';
 import Row from 'antd/es/row';
 import Form from 'antd/es/form';
-import {Input, message} from 'antd';
+import {Input} from 'antd';
 import {useDispatch, useSelector} from 'react-redux';
 import {getAuthData, getUserAccounts} from 'selectors';
 import {Account} from 'packages/thenewboston/src';

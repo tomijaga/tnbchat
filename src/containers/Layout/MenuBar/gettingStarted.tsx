@@ -1,5 +1,4 @@
 import {FC} from 'react';
-import Card from 'antd/es/card';
 import Col from 'antd/es/col';
 
 import Modal from 'antd/es/modal';

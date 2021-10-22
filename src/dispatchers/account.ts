@@ -1,11 +1,9 @@
 import {mainnetBank, testnetBank} from 'api/node';
-import {getAuthData} from 'selectors';
 import {setStateAuthData, setUserAccounts, setLocalAuthData, unsetUserAccount, clearUserAccounts} from 'store/app';
 import {Account} from 'packages/thenewboston/src';
 import {HdWallet} from 'tnb-hd-wallet';
-import {AppDispatch, AuthStatus, Dict, RootState, UserAccount} from 'types';
+import {AppDispatch, Dict, RootState, UserAccount} from 'types';
 import {Aes, getPfp} from 'utils';
-import {TNBChatAccountManager} from 'utils/app';
 import {getCypherAlgorithm, verifyAuth} from './auth';
 
 export const createSeedPhrase = (seedPhrase: string) => (dispatch: AppDispatch, getState: () => RootState) => {

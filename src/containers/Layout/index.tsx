@@ -7,7 +7,6 @@ import Grid from 'antd/es/grid';
 
 import MenuBar from './MenuBar';
 import MobileMenuBar from './MobileMenuBar';
-import AntdLayout from 'antd/es/layout';
 const {useBreakpoint} = Grid;
 
 const Layout: FC = ({children}) => {

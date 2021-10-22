@@ -2,11 +2,11 @@ import '../App.less';
 
 import {useEffect} from 'react';
 
-import {BrowserRouter as Router, Switch, Route, Redirect, useHistory} from 'react-router-dom';
+import {BrowserRouter as Router, Switch, Route, Redirect} from 'react-router-dom';
 
 import {useDispatch, useSelector} from 'react-redux';
 import {setStateAuthData} from 'store/app';
-import {getAuthData, getUserAccount, getUserAccounts} from 'selectors';
+import {getAuthData} from 'selectors';
 
 import Auth from './Auth';
 
@@ -28,7 +28,7 @@ export default function App() {
 
   useEffect(() => {
     dispatch(verifyAuth);
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="App">

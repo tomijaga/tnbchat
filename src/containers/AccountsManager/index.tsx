@@ -1,4 +1,4 @@
-import {FC, useCallback, useEffect, useState} from 'react';
+import {FC, useCallback, useEffect} from 'react';
 import Modal from 'antd/es/modal';
 import Row from 'antd/es/row';
 import Col from 'antd/es/col';
@@ -8,7 +8,7 @@ import Button from 'antd/es/button';
 import message from 'antd/es/message';
 
 import {getUserAccounts, getAuthData} from 'selectors';
-import {AuthStatus, UserAccount} from 'types';
+import {AuthStatus} from 'types';
 import {useDispatch, useSelector} from 'react-redux';
 import {verifyAuth} from 'dispatchers/auth';
 import {createAccount, fetchAndStoreAccountBalance, removeAllUserAccounts} from 'dispatchers/account';
@@ -26,15 +26,15 @@ const AccountsManager: FC = () => {
   const updateAccountBalances = useCallback(() => {
     console.log('Called ...');
     console.log({accounts});
-    Object.keys(accounts).map((accountNumber: string) => {
+    Object.keys(accounts).forEach((accountNumber: string) => {
       console.log('Fetching Account Balance of ', accounts[accountNumber].username);
       dispatch(fetchAndStoreAccountBalance(accountNumber));
     });
-  }, [accounts]);
+  }, [accounts, dispatch]);
 
   useEffect(() => {
     if (showManageAccountsModal === true) updateAccountBalances();
-  }, [showManageAccountsModal]);
+  }, [showManageAccountsModal, updateAccountBalances]);
 
   const displayManagedAccounts = () => {
     const accountKeys = Object.keys(accounts);

@@ -3,9 +3,8 @@ import Form from 'antd/es/form';
 import Input from 'antd/es/input';
 import Button from 'antd/es/button';
 import {useDispatch} from 'react-redux';
-import {setStateAuthData, setSessionAuthData} from 'store/app';
+import {setStateAuthData} from 'store/app';
 
-import {Aes} from 'utils';
 import {Typography} from 'antd';
 import {verifyPassword} from 'dispatchers/auth';
 
@@ -21,6 +20,8 @@ const VerifyUser: FC = () => {
           isLoggedIn: true,
         }),
       );
+    } else {
+      setIsWrongPassword(true);
     }
   };
 

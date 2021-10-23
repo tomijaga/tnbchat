@@ -7,7 +7,7 @@ export function formatUrl(url: string) {
   const cors = "https://infinite-atoll-88697.herokuapp.com";
 
   if (process.env.VERCEL_ENV === "production") {
-    `${cors}/${protocol ?? "http"}//${host}`;
+    return `${cors}/${protocol ?? "http"}//${host}`;
   }
   return `${protocol ?? "http"}//${host}`;
 }

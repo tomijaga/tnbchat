@@ -39,7 +39,6 @@ const Auth: FC<{
       case AuthStatus.verify_password:
         return <VerifyUser />;
       case AuthStatus.create_account:
-        return <AddAccount />;
       case AuthStatus.import_account:
         return <AddAccount />;
       default:
@@ -55,15 +54,22 @@ const Auth: FC<{
     );
   };
 
+  const getTitle = () => {
+    switch (authStatus) {
+      case AuthStatus.register_password:
+        return 'Password Setup';
+      case AuthStatus.verify_password:
+        return 'Verify Password';
+      case AuthStatus.create_account:
+        return "Setup your 'Seed Phrase'";
+      case AuthStatus.import_account:
+        return 'Import thenewboston Account';
+      default:
+        break;
+    }
+  };
   return (
-    <Modal
-      centered
-      visible={showAuthModal}
-      destroyOnClose
-      onCancel={closeAuthModal}
-      bodyStyle={{height: '500px', width: '350px'}}
-      footer={null}
-    >
+    <Modal title={getTitle()} centered visible={showAuthModal} destroyOnClose onCancel={closeAuthModal} footer={null}>
       {selectAuthComponents()}
     </Modal>
   );

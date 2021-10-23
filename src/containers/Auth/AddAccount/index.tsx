@@ -11,7 +11,7 @@ import {Account} from 'packages/thenewboston/src';
 import {setStateAuthData} from 'store/app';
 import {AuthStatus} from 'types';
 
-import NewAccount from './NewAccount';
+import NewAccount from './SeedPhraseSetup';
 import {importAccount} from 'dispatchers/account';
 import {verifyAuth} from 'dispatchers/auth';
 import {hexPattern} from 'utils';

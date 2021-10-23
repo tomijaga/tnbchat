@@ -17,14 +17,42 @@ const RegisterPassword: FC = () => {
      */
     dispatch(registerPassword(password));
   };
-  console.log('in register');
   return (
     <Form onFinish={handleCreatePasswordForm}>
       Enter Password
-      <Form.Item name={'password'}>
+      <Form.Item
+        name={'password'}
+        rules={[
+          {
+            required: true,
+            message: 'Password cannot be empty',
+          },
+          {
+            min: 8,
+            message: 'Password must be at least 8 characters',
+          },
+        ]}
+      >
         <Input.Password />
       </Form.Item>
-      <Form.Item name={'password2'}>
+      Confirm Password
+      <Form.Item
+        name={'confirm'}
+        rules={[
+          {
+            required: true,
+            message: 'Please confirm your password!',
+          },
+          ({getFieldValue}) => ({
+            validator(_, value) {
+              if (!value || getFieldValue('password') === value) {
+                return Promise.resolve();
+              }
+              return Promise.reject(new Error('The two passwords that you entered do not match!'));
+            },
+          }),
+        ]}
+      >
         <Input.Password />
       </Form.Item>
       <Form.Item>

@@ -2,6 +2,8 @@ import {useEffect, useState} from 'react';
 import Card from 'antd/es/card';
 import Button from 'antd/es/button';
 import Tag from 'antd/es/tag';
+import Row from 'antd/es/row';
+import Col from 'antd/es/col';
 
 import Typography from 'antd/es/typography';
 import {useDispatch, useSelector} from 'react-redux';
@@ -24,6 +26,7 @@ const NewAccount = () => {
   const [selectedWordsArray, setSelectedWordsArray] = useState<string[]>([]);
   const [randomOrderSeedPhrase, setRandomOrderSeedPhrase] = useState<string[]>([]);
 
+  const [isInWrongOrder, setIsInWrongOrder] = useState(false);
   useEffect(() => {
     const seedPhrase = generateMnemonic();
     setSeedPhrase(seedPhrase);
@@ -47,6 +50,10 @@ const NewAccount = () => {
 
         dispatch(setStateAuthData({showAuthModal: false}));
       }
+    } else if (selectedWordsArray.length >= 12) {
+      setIsInWrongOrder(true);
+    } else {
+      setIsInWrongOrder(false);
     }
   }, [selectedWordsArray, dispatch, appEncryptedUserPasswordHash, seedPhrase]);
 
@@ -67,51 +74,79 @@ const NewAccount = () => {
   const displaySeedPhraseAsTags = (seedPhrase: string[], selected: boolean = false) => {
     return seedPhrase.map((wordInSeedPhrase: string, index: number) => {
       return (
-        <Tag
-          onClick={() => {
-            selected ? deselectWord(wordInSeedPhrase, index) : selectWord(wordInSeedPhrase, index);
-          }}
-        >
-          {wordInSeedPhrase}
-        </Tag>
+        <Typography.Link>
+          <Tag
+            onClick={() => {
+              selected ? deselectWord(wordInSeedPhrase, index) : selectWord(wordInSeedPhrase, index);
+            }}
+          >
+            {wordInSeedPhrase}
+          </Tag>
+        </Typography.Link>
       );
     });
   };
 
   return (
-    <Card>
+    <Row justify="center" gutter={[10, 30]}>
       {verifyNow === false ? (
         <>
-          <Card>{seedPhrase}</Card>
+          <Col span={24}>
+            <Card size="small" title="Your Seed Phrase">
+              <Typography.Text strong code copyable>
+                {seedPhrase}
+              </Typography.Text>
+            </Card>
+          </Col>
 
-          <Typography.Text>
-            Copy and save your seed phrase in a secure location.
-            <br />
-            Go to this link to see the best ways to secure your seed phrase [Post link here]
-          </Typography.Text>
-          <Button
-            onClick={() => {
-              setVerifyNow(true);
-            }}
-          >
-            Verify Seed Phrase
-          </Button>
+          <Col>
+            <Typography.Text>Copy and save your seed phrase in a secure location.</Typography.Text>
+          </Col>
+
+          <Col>
+            <Button
+              onClick={() => {
+                setVerifyNow(true);
+              }}
+            >
+              Verify Seed Phrase
+            </Button>
+          </Col>
         </>
       ) : (
         <>
-          <Button
-            onClick={() => {
-              setVerifyNow(false);
-            }}
-          >
-            Back
-          </Button>
-          Verify Seed Phrase
-          <Card style={{background: 'lightgray'}}>{displaySeedPhraseAsTags(selectedWordsArray, true)}</Card>
-          {displaySeedPhraseAsTags(randomOrderSeedPhrase)}
+          <Col span={24}>
+            <Button
+              size="small"
+              onClick={() => {
+                setVerifyNow(false);
+              }}
+            >
+              Back
+            </Button>
+            <br />
+            <br />
+            <Card size="small" title="Verify Seed Phrase" style={{background: 'rgba(0, 0, 0, 0.05)'}}>
+              <Row gutter={[10, 10]}>{displaySeedPhraseAsTags(selectedWordsArray, true)}</Row>
+            </Card>
+          </Col>
+
+          <Col>Click on the words in the right order to verify your seed phrase</Col>
+
+          <Col span={24}>
+            <Row justify="center" gutter={[10, 10]}>
+              {displaySeedPhraseAsTags(randomOrderSeedPhrase)}
+            </Row>
+          </Col>
+
+          {isInWrongOrder && (
+            <Col>
+              <Typography.Text type="danger">Seed Phrase is in the wrong order</Typography.Text>
+            </Col>
+          )}
         </>
       )}
-    </Card>
+    </Row>
   );
 };
 

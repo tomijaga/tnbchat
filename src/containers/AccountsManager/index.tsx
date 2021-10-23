@@ -30,7 +30,9 @@ const AccountsManager: FC = () => {
       console.log('Fetching Account Balance of ', accounts[accountNumber].username);
       dispatch(fetchAndStoreAccountBalance(accountNumber));
     });
-  }, [accounts, dispatch]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
   useEffect(() => {
     if (showManageAccountsModal === true) updateAccountBalances();

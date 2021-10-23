@@ -48,7 +48,7 @@ const MenuBar = () => {
         }}
         justify="start"
       >
-        <Col style={{margin: '50px 20px'}}>
+        <Col style={{margin: '50px 0px'}}>
           <Typography.Title level={5}>Decentralized Chat App</Typography.Title>
         </Col>
         <Col span={24}>

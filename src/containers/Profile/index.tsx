@@ -44,13 +44,23 @@ const Profile = () => {
   const currUserAccount = useSelector(getUserAccount);
   const accounts = useSelector(getUserAccounts);
 
-  const profileIsOwnedByUser = !!accounts[accountNumber];
+  const [profileIsOwnedByUser, setProfileIsOwnedByUser] = useState(!!accounts[accountNumber]);
 
   const screens = useBreakpoint();
   const [profileData, setProfileData] = useState<Partial<ProfileData>>({});
   const [posts, setPosts] = useState<PaginatedTransactionEntry[]>([]);
 
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+
+  useEffect(() => {
+    const isOwned = !!accounts[accountNumber];
+    if (isOwned === profileIsOwnedByUser) {
+      return;
+    } else {
+      setProfileIsOwnedByUser(isOwned);
+    }
+  }, [accounts, profileIsOwnedByUser, accountNumber]);
+
   useEffect(() => {
     const getUserAccountInfo = async () => {
       //   const apiProfileData: Partial<ProfileData> = {};

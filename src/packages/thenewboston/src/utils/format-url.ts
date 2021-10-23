@@ -4,7 +4,10 @@
  */
 export function formatUrl(url: string) {
   const { protocol, host } = new URL(url);
-  const cors = "https://radiant-taiga-39526.herokuapp.com";
+  const cors = "https://infinite-atoll-88697.herokuapp.com";
 
-  return `${cors}/${protocol ?? "http"}//${host}`;
+  if (process.env.NODE_ENV === "production") {
+    `${cors}/${protocol ?? "http"}//${host}`;
+  }
+  return `${protocol ?? "http"}//${host}`;
 }

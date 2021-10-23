@@ -30,59 +30,72 @@ export class Aes {
     // 16 byte hash with the user's password and a known salt
 
     if (password) {
-      this.hashInBytes = Aes.hashFromPassword(password);
+      this.hashInBytes = Aes.hashPassword(password);
     } else if (hash) {
-      this.hashInBytes = hexToBytes(hash);
+      const aesWithTnbChatKey = new Aes({password: process.env.REACT_APP_ENCRYPTION_KEY});
+      this.hashInBytes = aesWithTnbChatKey.ctrDecryption(hash);
+      console.log({backToHash: this.hashInBytes});
     } else {
       throw new Error('');
     }
   }
 
-  static verify(password: string, hash: string) {
-    return bytesToHex(Aes.hashFromPassword(password)) === hash;
+  static verifyPassword(password: string, hash: string) {
+    return bytesToHex(Aes.hashPassword(password)) === hash;
   }
 
-  static hashFromPassword(password: string) {
+  static hashPassword(password: string) {
     if (!password || password.length < 7) throw Error('Invalid Password');
 
     const keyInBytes = Buffer.from(password.normalize('NFKC'));
-    const saltInBytes = Buffer.from(process.env.REACT_APP_SALT!.normalize('NFKC'));
+    const saltInBytes = Buffer.from(process.env.REACT_APP_16_BYTES_SALT!.normalize('NFKC'));
     const bytesLength = 16;
     return scrypt.syncScrypt(keyInBytes, saltInBytes, 1024, 8, 1, bytesLength);
   }
 
-  ctrEncryption = (text: string, counter: number = 1) => {
-    text = text.normalize();
-
-    // Convert text to bytes
-    const textBytes = stringToBytes(text);
-
+  ctrEncryption = (textBytes: Uint8Array, counter: number = 1) => {
     // The counter is optional, and if omitted will begin at 1
     const aesCtr = new aesjs.ModeOfOperation.ctr(this.hashInBytes, new aesjs.Counter(counter));
     const encryptedBytes = aesCtr.encrypt(textBytes);
-
-    // To print or store the binary data, you may convert it to hex
-    const encryptedHex = bytesToHex(encryptedBytes);
-
-    return encryptedHex;
+    console.log({encryptedBytes});
+    return encryptedBytes;
   };
 
-  ctrDecryption = (encryptedHex: string, counter: number = 1) => {
+  textEncryption = (text: string, counter: number = 1) => {
+    text = text.normalize('NFKC');
+    const textBytes = stringToBytes(text);
+
+    const encryptedBytes = this.ctrEncryption(textBytes, counter);
+
+    // To print or store the binary data, you may convert it to hex
+    return bytesToHex(encryptedBytes);
+  };
+
+  ctrDecryption = (encryptedHex: string | Uint8Array, counter: number = 1) => {
+    let encryptedBytes: Uint8Array;
     // When ready to decrypt the hex string, convert it back to bytes
-    const encryptedBytes = hexToBytes(encryptedHex);
+    if (typeof encryptedHex === 'string') encryptedBytes = hexToBytes(encryptedHex);
+    else encryptedBytes = encryptedHex;
 
     // The counter mode of operation maintains internal state, so to
     // decrypt a new instance must be instantiated.
     const aesCtr = new aesjs.ModeOfOperation.ctr(this.hashInBytes, new aesjs.Counter(counter));
     const decryptedBytes = aesCtr.decrypt(encryptedBytes);
 
-    // Convert our bytes back into text
-    const decryptedText = bytesToString(decryptedBytes);
-
-    return decryptedText;
+    return decryptedBytes;
   };
 
-  get hashInHex() {
-    return bytesToHex(this.hashInBytes);
+  textDecryption = (encryptedHex: string, counter: number = 1) => {
+    const decryptedBytes = this.ctrDecryption(encryptedHex, counter);
+
+    // Convert our bytes back into text
+    return bytesToString(decryptedBytes);
+  };
+
+  get encryptedPasswordHash() {
+    const aesWithTnbChatKey = new Aes({password: process.env.REACT_APP_ENCRYPTION_KEY});
+    console.log({hashInBytes: this.hashInBytes});
+    const encryptedHashInBytes = aesWithTnbChatKey.ctrEncryption(this.hashInBytes);
+    return bytesToHex(encryptedHashInBytes);
   }
 }

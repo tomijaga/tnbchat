@@ -3,39 +3,32 @@ import Form from 'antd/es/form';
 import Input from 'antd/es/input';
 import Button from 'antd/es/button';
 import {useDispatch} from 'react-redux';
-import {setAuthData} from 'store/app';
+import {setStateAuthData} from 'store/app';
 
-import {Aes} from 'utils';
 import {Typography} from 'antd';
+import {verifyPassword} from 'dispatchers/auth';
 
 const VerifyUser: FC = () => {
   const dispatch = useDispatch();
   const [isWrongPassword, setIsWrongPassword] = useState(false);
 
-  const handleVerifyUser = ({tnbchatPassword}: any) => {
-    const aes = new Aes({password: tnbchatPassword});
-
-    const encryptedText = JSON.parse(localStorage.getItem('encrypted_text')!);
-    const decryptedText = aes.ctrDecryption(encryptedText);
-    console.log({decryptedText});
-    if (decryptedText === process.env.REACT_APP_PLAIN_TEXT) {
+  const handleVerifyUser = ({password}: any) => {
+    if (dispatch(verifyPassword(password))) {
       dispatch(
-        setAuthData({
-          passwordHash: aes.hashInHex,
+        setStateAuthData({
           showAuthModal: false,
           isLoggedIn: true,
         }),
       );
     } else {
       setIsWrongPassword(true);
-      console.log('Wrong Password');
     }
   };
 
   return (
     <Form onFinish={handleVerifyUser}>
       Enter Password
-      <Form.Item name={'tnbchatPassword'}>
+      <Form.Item name={'password'}>
         <Input.Password />
       </Form.Item>
       {isWrongPassword && <Typography.Text type="danger">Wrong Password</Typography.Text>}

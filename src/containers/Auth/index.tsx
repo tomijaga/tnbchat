@@ -1,7 +1,7 @@
 import {FC, useEffect} from 'react';
 import Modal from 'antd/es/modal';
 import {useDispatch, useSelector} from 'react-redux';
-import {setAuthData} from 'store/app';
+import {setStateAuthData} from 'store/app';
 import {getAuthData} from 'selectors';
 
 import AddAccount from './AddAccount';
@@ -15,13 +15,15 @@ const Auth: FC<{
   onCancel: () => void;
 }> = () => {
   const dispatch = useDispatch();
-  const {isLoggedIn, showAuthModal, authStatus} = useSelector(getAuthData);
+  const {
+    state: {isLoggedIn, showAuthModal, authStatus},
+  } = useSelector(getAuthData);
 
   useEffect(() => {
     if (!isLoggedIn) {
       if (localStorage.getItem('encrypted_text')) {
         dispatch(
-          setAuthData({
+          setStateAuthData({
             showAuthModal: true,
             authStatus: AuthStatus.verify_password,
           }),
@@ -37,7 +39,6 @@ const Auth: FC<{
       case AuthStatus.verify_password:
         return <VerifyUser />;
       case AuthStatus.create_account:
-        return <AddAccount />;
       case AuthStatus.import_account:
         return <AddAccount />;
       default:
@@ -47,14 +48,28 @@ const Auth: FC<{
 
   const closeAuthModal = () => {
     dispatch(
-      setAuthData({
+      setStateAuthData({
         showAuthModal: false,
       }),
     );
   };
 
+  const getTitle = () => {
+    switch (authStatus) {
+      case AuthStatus.register_password:
+        return 'Password Setup';
+      case AuthStatus.verify_password:
+        return 'Verify Password';
+      case AuthStatus.create_account:
+        return "Setup your 'Seed Phrase'";
+      case AuthStatus.import_account:
+        return 'Import thenewboston Account';
+      default:
+        break;
+    }
+  };
   return (
-    <Modal visible={showAuthModal} onCancel={closeAuthModal} bodyStyle={{height: '500px', width: '350px'}}>
+    <Modal title={getTitle()} centered visible={showAuthModal} destroyOnClose onCancel={closeAuthModal} footer={null}>
       {selectAuthComponents()}
     </Modal>
   );

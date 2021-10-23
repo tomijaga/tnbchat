@@ -10,9 +10,6 @@ export function formatUrl(url: string) {
     console.log(process.env.NODE_ENV);
 
     return `${cors}/${protocol ?? "http"}//${host}`;
-  } else if (window.location.host.includes("tnbchat")) {
-    console.log("hack");
-    return `${cors}/${protocol ?? "http"}//${host}`;
   }
   return `${protocol ?? "http"}//${host}`;
 }

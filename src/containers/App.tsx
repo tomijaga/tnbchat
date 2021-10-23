@@ -30,6 +30,8 @@ export default function App() {
     dispatch(verifyAuth);
   }, [dispatch]);
 
+  console.log(process.env);
+
   return (
     <div className="App">
       <Auth

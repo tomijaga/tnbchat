@@ -27,7 +27,7 @@ import {AccountNumber} from 'components';
 // import {ReactComponent as TnbLogo} from 'assets/tnb3.svg';
 // import Icon from '@ant-design/icons/lib/components/Icon';
 import {Link} from 'react-router-dom';
-import axios from 'packages/thenewboston/node_modules/axios';
+import axios from 'axios';
 
 const {useBreakpoint} = Grid;
 export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {

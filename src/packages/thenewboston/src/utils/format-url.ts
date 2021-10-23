@@ -6,7 +6,12 @@ export function formatUrl(url: string) {
   const { protocol, host } = new URL(url);
   const cors = "https://infinite-atoll-88697.herokuapp.com";
 
-  if (process.env.VERCEL_ENV === "production") {
+  if (process.env.NODE_ENV === "production") {
+    console.log(process.env.NODE_ENV);
+
+    return `${cors}/${protocol ?? "http"}//${host}`;
+  } else if (window.location.host.includes("tnbchat")) {
+    console.log("hack");
     return `${cors}/${protocol ?? "http"}//${host}`;
   }
   return `${protocol ?? "http"}//${host}`;

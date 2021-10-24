@@ -16,9 +16,9 @@ export const AccountNumber: FC<{accountNumber: string; style?: CSSProperties}> =
     >
       <Tooltip title="Copied" visible={isCopied}>
         <Button
+          style={{...style, ...{color: 'secondary'}}}
           size="small"
           type="text"
-          style={style}
           onClick={async (e) => {
             e?.stopPropagation();
             await navigator.clipboard.writeText(accountNumber);

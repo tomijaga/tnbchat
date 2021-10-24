@@ -75,7 +75,8 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
           </Typography.Link>
         );
       }
-    } catch {
+    } catch (e) {
+      console.log({e});
       return <Typography.Text>{url}</Typography.Text>;
     }
   };
@@ -169,9 +170,7 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                     }}
                     to={profilePageUrl}
                   >
-                    <Typography.Text strong style={{color: 'gray'}}>
-                      {'User-' + tx.block.sender.slice(0, 4)}
-                    </Typography.Text>
+                    <Typography.Text strong>{'User-' + tx.block.sender.slice(0, 4)}</Typography.Text>
                   </Link>
                 </Col>
                 <Col
@@ -226,7 +225,9 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                 </Col> */}
               </Row>
             </Col>
-            <Col span={24}>{memoData}</Col>
+            <Col span={24} style={{fontSize: '15px'}}>
+              {memoData}
+            </Col>
 
             {/* {action} */}
             <Col>

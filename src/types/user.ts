@@ -1,5 +1,11 @@
-export interface Account {
+import {MessageData} from 'api/message';
+import {Dict, IpfsProfileData} from 'types';
+
+export interface AccountNumber {
   account_number: string;
+}
+
+export interface Account extends AccountNumber {
   encrypted_signing_key: string;
 }
 
@@ -17,6 +23,13 @@ export interface UserData {
 
   //profile picture
   pfp: string;
+  profile: IpfsProfileData;
+  mainnet_balance: number;
+  testnet_balance: number;
+  messages: Dict<MessageData>;
+}
+
+export interface AccountBalance extends AccountNumber {
   mainnet_balance: number;
   testnet_balance: number;
 }

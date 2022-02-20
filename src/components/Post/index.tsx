@@ -1,40 +1,50 @@
 import {FC, ReactNode, useEffect, useState, useCallback} from 'react';
-// import {useHistory} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 
 import Avatar from 'antd/es/avatar';
-// import Button from 'antd/es/button';
+import Button from 'antd/es/button';
 import Card from 'antd/es/card';
 import Col from 'antd/es/col';
 import Row from 'antd/es/row';
 import Tag from 'antd/es/tag';
-// import MoreOutlined from '@ant-design/icons/MoreOutlined';
+import MoreOutlined from '@ant-design/icons/MoreOutlined';
 import Typography from 'antd/es/typography';
-import {decodePostMessage, getPfp} from 'utils';
+import {decodePostMessage, getDefaultPfp} from 'utils';
 import {format as formatDate, formatDistanceToNowStrict, compareAsc, sub as subtractFromDate} from 'date-fns';
 import isUrl from 'is-url';
 import Grid from 'antd/es/grid';
-// import ReactPlayer from 'react-player';
+import ReactPlayer from 'react-player';
 import Tooltip from 'antd/es/tooltip';
 
 import {PaginatedTransactionEntry} from 'packages/thenewboston/src';
 
-// import CommentOutlined from '@ant-design/icons/CommentOutlined';
-// import LikeOutlined from '@ant-design/icons/LikeOutlined';
-// import DislikeOutlined from '@ant-design/icons/DislikeOutlined';
+import CommentOutlined from '@ant-design/icons/CommentOutlined';
+import LikeOutlined from '@ant-design/icons/LikeOutlined';
+import DislikeOutlined from '@ant-design/icons/DislikeOutlined';
 
-import {AccountNumber} from 'components';
+import {AccountNumber, CustomTags} from 'components';
 
-// import {ReactComponent as TnbLogo} from 'assets/tnb3.svg';
-// import Icon from '@ant-design/icons/lib/components/Icon';
+import {ReactComponent as TnbLogo} from 'assets/tnb3.svg';
+import Icon from '@ant-design/icons/lib/components/Icon';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
 
+import {PostData} from 'api';
+import {useSelector} from 'react-redux';
+import {getUserProfiles} from 'selectors';
+import {nanoid} from '@reduxjs/toolkit';
+
 const {useBreakpoint} = Grid;
-export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
+export const Post: FC<{data: PostData; skeleton?: boolean}> = ({data: tx, skeleton}) => {
   // const history = useHistory();
   const screens = useBreakpoint();
   const [memoData, setMemoData] = useState<ReactNode[]>([]);
-  const profilePageUrl = `/accounts/${tx.block.sender}`;
+  const accountNumber = tx.block.sender;
+
+  const profilePageUrl = `/accounts/${accountNumber}`;
+
+  const profiles = useSelector(getUserProfiles);
+  const profile = profiles[accountNumber];
 
   const embedUrl = async (url: string) => {
     try {
@@ -47,6 +57,7 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
       if (contentType.includes('image')) {
         return (
           <img
+            key={nanoid()}
             style={{
               width: '300px',
               height: '300px',
@@ -59,6 +70,7 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
       } else if (contentType.includes('video')) {
         return (
           <iframe
+            key={nanoid()}
             width="300px"
             height="300px"
             src={responseURL}
@@ -70,14 +82,14 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
         );
       } else {
         return (
-          <Typography.Link href={url} target="_blank">
+          <Typography.Link key={nanoid()} href={url} target="_blank">
             {responseURL}
           </Typography.Link>
         );
       }
     } catch (e) {
       console.log({e});
-      return <Typography.Text>{url}</Typography.Text>;
+      return <Typography.Text key={nanoid()}>{url}</Typography.Text>;
     }
   };
 
@@ -85,33 +97,33 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
     const decodedText = decodePostMessage(memo);
     const formattedWords: ReactNode[] = [];
 
-    let paragraph = '';
-
-    for (const word of decodedText.split(' ')) {
-      if (word.includes('\n')) {
-        const splitWords = word.split('\n');
-        for (const splitWord of splitWords) {
-          if (splitWord !== splitWords[splitWords.length - 1]) {
-            formattedWords.push(<Typography.Paragraph>{paragraph + splitWord}</Typography.Paragraph>);
-            paragraph = '';
-          } else {
-            paragraph = splitWord;
-          }
-        }
-      } else {
+    for (const paragraph of decodedText.split('\n')) {
+      for (const word of paragraph.split(' ')) {
+        let plaintext = '';
+        const formattedParagraph: ReactNode[] = [];
         if (isUrl(word)) {
-          // console.log(word, 'is Url');
-          formattedWords.push(<Typography.Text>{paragraph + ' '}</Typography.Text>);
-          formattedWords.push(await embedUrl(word));
+          formattedParagraph.push(
+            <Typography.Text key={nanoid()} mark>
+              {plaintext + ' '}
+            </Typography.Text>,
+          );
 
-          paragraph = ' ';
+          formattedParagraph.push(await embedUrl(word));
         } else {
-          paragraph = paragraph.concat(' ', word);
+          plaintext = plaintext.concat(' ', word);
         }
       }
+      formattedWords.push(
+        paragraph ? (
+          <Typography.Paragraph key={nanoid()} style={{margin: '0px'}}>
+            {paragraph}
+          </Typography.Paragraph>
+        ) : (
+          <br key={nanoid()} />
+        ),
+      );
     }
 
-    formattedWords.push(<Typography.Text>{paragraph}</Typography.Text>);
     return formattedWords;
   }, []);
 
@@ -134,15 +146,22 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
   };
 
   useEffect(() => {
-    formatMemo(tx.memo ?? '').then((result) => {
-      setMemoData(result);
-    });
+    if (tx.ipfs_data) {
+      formatMemo(tx.ipfs_data.text).then((result) => {
+        setMemoData(result);
+      });
+    } else {
+      formatMemo(tx.memo ?? '').then((result) => {
+        setMemoData(result);
+      });
+    }
   }, [tx, formatMemo]);
 
   return (
-    // <Link to={`/${tx.block.sender}/post/${tx.block.balance_key}`} style={{zIndex: 0}}>
+    // <Link to={`/${accountNumber}/post/${tx.block.balance_key}`} style={{zIndex: 0}}>
     <Card
-      size={screens.xs ? 'small' : 'default'}
+      // bordered={false}
+      size={'small'}
       id="post"
       onClick={(e) => {
         // history.push(`/posts/${tx.block.balance_key}`);
@@ -156,7 +175,11 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
             }}
             to={profilePageUrl}
           >
-            <Avatar style={{background: 'rgba(0,0,0, 0.05)'}} src={getPfp(tx.block.sender)} alt="pfp" />
+            <Avatar
+              style={{background: 'rgba(0,0,0, 0.05)'}}
+              src={profile?.pfp_url || getDefaultPfp(accountNumber)}
+              alt="pfp"
+            />
           </Link>
         </Col>
         <Col style={{width: 'calc(100% - 50px )'}}>
@@ -170,7 +193,7 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                     }}
                     to={profilePageUrl}
                   >
-                    <Typography.Text strong>{'User-' + tx.block.sender.slice(0, 4)}</Typography.Text>
+                    <Typography.Text strong>{profile?.display_name || accountNumber.slice(0, 4)}</Typography.Text>
                   </Link>
                 </Col>
                 <Col
@@ -179,17 +202,15 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                   }}
                   style={{color: 'lightgray'}}
                 >
-                  <AccountNumber accountNumber={tx.block.sender} />
+                  <AccountNumber accountNumber={accountNumber} />
                 </Col>
                 <Col>
-                  <Tag
+                  <CustomTags
+                    type="gov"
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
-                    color="gold"
-                  >
-                    Gov
-                  </Tag>
+                  />
                 </Col>
               </Row>
             </Col>
@@ -231,8 +252,8 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
 
             {/* {action} */}
             <Col>
-              {/* <Row gutter={20} align="middle" justify="space-between">
-                <Col style={{marginLeft: '-10px'}}>
+              <Row gutter={20} align="middle" justify="space-between">
+                {/* <Col style={{marginLeft: '-10px'}}>
                   <Tooltip overlayInnerStyle={{fontSize: 'smaller'}} placement="bottomLeft" title="Like">
                     <Button
                       onClick={(e) => {
@@ -246,8 +267,8 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                     />{' '}
                     0
                   </Tooltip>
-                </Col>
-                <Col>
+                </Col> */}
+                {/* <Col>
                   <Tooltip overlayInnerStyle={{fontSize: 'smaller'}} placement="bottomLeft" title="Dislike">
                     <Button
                       onClick={(e) => {
@@ -261,8 +282,8 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                     />{' '}
                     0{' '}
                   </Tooltip>
-                </Col>
-                <Col>
+                </Col> */}
+                {/* <Col>
                   <Tooltip overlayInnerStyle={{fontSize: 'smaller'}} placement="bottomLeft" title="Reply">
                     <Button
                       onClick={(e) => {
@@ -276,8 +297,8 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                     />{' '}
                     0 Replies
                   </Tooltip>
-                </Col>
-                <Col push={2} style={{zIndex: 10}}>
+                </Col> */}
+                {/* <Col push={2} style={{zIndex: 10}}>
                   <Tooltip overlayInnerStyle={{fontSize: 'smaller'}} placement="bottomLeft" title="Gift User Tnb coins">
                     <Button
                       onClick={(e) => {
@@ -291,9 +312,8 @@ export const Post: FC<{data: PaginatedTransactionEntry}> = ({data: tx}) => {
                     />
                     Tip
                   </Tooltip>
-                </Col>
+                </Col> */}
               </Row>
-            */}
             </Col>
           </Row>
         </Col>

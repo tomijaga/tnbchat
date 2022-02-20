@@ -2,7 +2,7 @@ import {setStateAuthData, setLocalAuthData, setSessionAuthData} from 'store/app'
 import {AppDispatch, AuthStatus, RootState} from 'types';
 import {Aes} from 'utils';
 
-const lockApp = (dispatch: AppDispatch, getState: () => RootState) => {
+export const lockApp = (dispatch: AppDispatch, getState: () => RootState) => {
   dispatch(
     setSessionAuthData({
       appEncryptedUserPasswordHash: undefined,
@@ -45,6 +45,10 @@ const extendUnlockedPeriod = (dispatch: AppDispatch, getState: () => RootState) 
   }
 };
 
+export const unlockApp = (dispatch: AppDispatch, getState: () => RootState) => {
+  dispatch(setStateAuthData({authStatus: AuthStatus.verify_password, showAuthModal: true}));
+};
+
 export const verifyAuth = (dispatch: AppDispatch, getState: () => RootState) => {
   const {
     app: {auth},
@@ -69,7 +73,7 @@ export const verifyAuth = (dispatch: AppDispatch, getState: () => RootState) => 
       console.log('Safety_text Is not Correct');
       //wrong password or safety text was changed (highly unlikly)
 
-      dispatch(setStateAuthData({authStatus: AuthStatus.verify_password, showAuthModal: true}));
+      dispatch(unlockApp);
     }
   } else {
     console.log('appEncryptedUserPasswordHash', false);
@@ -81,7 +85,7 @@ export const verifyAuth = (dispatch: AppDispatch, getState: () => RootState) => 
     } else {
       console.log('encryptedSafetyText', true);
 
-      dispatch(setStateAuthData({authStatus: AuthStatus.verify_password, showAuthModal: true}));
+      dispatch(unlockApp);
     }
   }
 

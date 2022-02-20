@@ -1,1 +1,1 @@
-export const MAX_ENCODED_POST_LENGTH = 64;
+export const MAX_POST_LENGTH = 280;

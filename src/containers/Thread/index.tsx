@@ -4,7 +4,7 @@ import {useParams} from 'react-router-dom';
 import Col from 'antd/es/col';
 import {Post} from 'components';
 import Row from 'antd/es/row';
-import {getPost} from 'api';
+import {getPost, PostData} from 'api';
 import {PaginatedTransactionEntry} from 'packages/thenewboston/src';
 
 interface ThreadParam {
@@ -13,7 +13,7 @@ interface ThreadParam {
 
 const Thread = () => {
   const balanceKey = useParams<ThreadParam>().balance_key;
-  const [mainPost, setMainPost] = useState<PaginatedTransactionEntry | null>(null);
+  const [mainPost, setMainPost] = useState<PostData | null>(null);
 
   console.log({balanceKey, mainPost});
   useEffect(() => {

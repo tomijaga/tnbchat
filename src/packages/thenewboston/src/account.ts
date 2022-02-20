@@ -1,8 +1,13 @@
 import { createAccountData, uint8arrayToHex, hexToUint8Array } from "./utils";
 import type { BlockData, BlockMessage, SignedMessage, Transaction } from "./models";
-import { sign } from "tweetnacl";
+import { sign, box, randomBytes, secretbox } from "tweetnacl";
+import { convertPublicKey, convertSecretKey } from "ed2curve";
 
 type AccountKeys = [Uint8Array, Uint8Array];
+interface EncryptedData {
+  nonce: string;
+  encryptedMessage: string;
+}
 
 /** Used for creating accounts to be sent with requests. */
 export class Account {
@@ -138,5 +143,81 @@ export class Account {
       ...blockData,
       signature: this.createSignature(JSON.stringify(blockData.message)),
     };
+  }
+
+  encryptMessage(message: string, nonce?: string): EncryptedData {
+    const encodedMessage = new TextEncoder().encode(message);
+
+    let nonceArray: Uint8Array;
+
+    if (nonce) {
+      nonceArray = hexToUint8Array(nonce);
+    } else {
+      nonceArray = randomBytes(24);
+      nonce = uint8arrayToHex(nonceArray);
+    }
+
+    const dhSecretKey = convertSecretKey(this.signingKey);
+
+    const encryptedMessageArray = secretbox(encodedMessage, nonceArray, dhSecretKey);
+
+    const encryptedMessage = uint8arrayToHex(encryptedMessageArray);
+
+    return { encryptedMessage, nonce };
+  }
+
+  decryptMessage(encryptedMessage: string, nonce: string): string {
+    const encryptesMessageArray = hexToUint8Array(encryptedMessage);
+    const nonceArray = hexToUint8Array(nonce);
+
+    const dhSecretKey = convertSecretKey(this.signingKey);
+    const decryptedMessageArray = secretbox.open(encryptesMessageArray, nonceArray, dhSecretKey);
+
+    if (decryptedMessageArray) {
+      return new TextDecoder().decode(decryptedMessageArray);
+    }
+
+    throw new Error("Message could not be decrypted");
+  }
+
+  peerEncryption(recieverPublicKey: string, message: string, nonce?: string) {
+    const encodedMessage = new TextEncoder().encode(message);
+    let nonceArray: Uint8Array;
+
+    if (nonce) {
+      nonceArray = hexToUint8Array(nonce);
+    } else {
+      nonceArray = randomBytes(24);
+      nonce = uint8arrayToHex(nonceArray);
+    }
+
+    const recieverPublicKeyArray = hexToUint8Array(recieverPublicKey);
+
+    const receiverDHPublicKey = convertPublicKey(recieverPublicKeyArray)!;
+    const myDHSecretKey = convertSecretKey(this.signingKey);
+
+    const encryptedMessageArray = box(encodedMessage, nonceArray, receiverDHPublicKey, myDHSecretKey);
+
+    const encryptedMessage = uint8arrayToHex(encryptedMessageArray);
+
+    return { nonce, encryptedMessage };
+  }
+
+  peerDecryption(senderPublicKey: string, encryptedMessage: string, nonce: string) {
+    const senderPublicKeyArray = hexToUint8Array(senderPublicKey);
+    const nonceArray = hexToUint8Array(nonce);
+
+    const encryptedMessageArray = hexToUint8Array(encryptedMessage);
+
+    const senderDHPublicKey = convertPublicKey(senderPublicKeyArray)!;
+    const myDHSecretKey = convertSecretKey(this.signingKey);
+
+    const decryptedMessageArray = box.open(encryptedMessageArray, nonceArray, senderDHPublicKey, myDHSecretKey);
+
+    if (decryptedMessageArray) {
+      return new TextDecoder().decode(decryptedMessageArray);
+    }
+
+    throw new Error("Message could not be decrypted");
   }
 }

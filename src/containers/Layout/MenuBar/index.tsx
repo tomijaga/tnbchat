@@ -3,31 +3,37 @@ import {useHistory} from 'react-router-dom';
 import Card from 'antd/es/card';
 import Col from 'antd/es/col';
 import Dropdown from 'antd/es/dropdown';
-
+import Button from 'antd/es/button';
 import Menu from 'antd/es/menu';
 import Row from 'antd/es/row';
 import CaretDownOutlined from '@ant-design/icons/CaretDownOutlined';
 import message from 'antd/es/message';
 
-import {DeleteAccountModal} from 'components';
+import {DeleteAccountModal, CustomTags, ProfilePicture} from 'components';
 import GettingStarted from './gettingStarted';
 import {useDispatch, useSelector} from 'react-redux';
 import {setStateAuthData} from 'store/app';
-import {verifyAuth} from 'dispatchers';
-import {getUserAccount, getUserAccounts, getAuthData} from 'selectors';
+import {lockApp, unlockApp, verifyAuth} from 'dispatchers';
+import {getUserAccount, getUserAccounts, getAuthData, getUserProfiles} from 'selectors';
 
-import {getPfp} from 'utils';
 import {AuthStatus} from 'types';
 import Typography from 'antd/es/typography';
+import Tooltip from 'antd/es/tooltip';
+
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faCoffee, faLock, faLockOpen} from '@fortawesome/free-solid-svg-icons';
 
 const MenuBar = () => {
   const history = useHistory();
   const dispatch = useDispatch();
   const {
-    state: {hasCreatedSeedPhrase},
+    state: {hasCreatedSeedPhrase, isLoggedIn},
   } = useSelector(getAuthData);
   const account = useSelector(getUserAccount);
   const accounts = useSelector(getUserAccounts);
+
+  const profiles = useSelector(getUserProfiles);
+  const profile = account?.account_number ? profiles[account?.account_number] : null;
 
   const [showGettingStarted, setShowGettingStarted] = useState(false);
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
@@ -100,20 +106,22 @@ const MenuBar = () => {
                 >
                   <Card style={{borderRadius: '10px'}} size="small">
                     <Row justify="space-between" align="bottom">
-                      <Col>
+                      <Col span={20} flex="1 1 100px">
                         <Row align="bottom" gutter={5}>
                           <Col>
-                            <img
-                              width="25px"
-                              src={getPfp(account?.account_number!)}
-                              alt="avatar"
-                              style={{borderRadius: '2px'}}
-                            />{' '}
+                            {account?.account_number && (
+                              <ProfilePicture accountNumber={account?.account_number} size={'small'} />
+                            )}
                           </Col>
-                          <Col>{account?.username}</Col>
+                          <Col>
+                            <Typography.Text ellipsis style={{fontSize: 'small'}} strong>
+                              {' '}
+                              {profile?.display_name}{' '}
+                            </Typography.Text>
+                          </Col>
                         </Row>
                       </Col>
-                      <Col>
+                      <Col flex="0 0 auto" span={2}>
                         <CaretDownOutlined />
                       </Col>
                     </Row>
@@ -176,18 +184,78 @@ const MenuBar = () => {
                     Home
                   </Menu.Item>
                   <Menu.Item
-                    key="menu-profile-option"
+                    key={'channels'}
                     onClick={() => {
-                      history.push(`/accounts/${account?.account_number}`);
+                      history.push('/channels');
                     }}
                   >
-                    Profile
+                    Channels
                   </Menu.Item>
-                  {/* <Menu.Item>Channels</Menu.Item> */}
-                  {/* <Menu.Item>Gov Proposals</Menu.Item> */}
-                  {/* <Menu.Item>Wallet</Menu.Item> */}
+                  <Menu.SubMenu title="Governance" key="governance">
+                    <Menu.Item
+                      key="governance/voting"
+                      onClick={() => {
+                        history.push('/governance/voting');
+                      }}
+                    >
+                      Voting {<CustomTags type="gov" />}
+                    </Menu.Item>
+                    <Menu.Item
+                      key="governance/boosting"
+                      onClick={() => {
+                        history.push('/governance/boosting');
+                      }}
+                    >
+                      Node Boosting
+                    </Menu.Item>
+                    <Menu.Item
+                      key="governance/proposals"
+                      onClick={() => {
+                        history.push('/governance/proposals');
+                      }}
+                    >
+                      Proposals
+                    </Menu.Item>
+                  </Menu.SubMenu>
                 </Menu.ItemGroup>
                 <Menu.ItemGroup>
+                  {hasCreatedSeedPhrase && (
+                    <>
+                      <Menu.Item
+                        key="menu-profile-option"
+                        onClick={() => {
+                          history.push(`/accounts/${account?.account_number}`);
+                        }}
+                      >
+                        Profile / Wallet
+                      </Menu.Item>
+                      <Menu.Item
+                        key={'messages'}
+                        onClick={() => {
+                          history.push('/messages');
+                        }}
+                      >
+                        Messages
+                      </Menu.Item>
+                      {/* <Menu.Item
+                        key={'wallet'}
+                        onClick={() => {
+                          history.push('/wallet');
+                        }}
+                      >
+                        Wallet
+                      </Menu.Item> */}
+
+                      <Menu.Item
+                        key={'settings'}
+                        onClick={() => {
+                          history.push('/settings');
+                        }}
+                      >
+                        Settings
+                      </Menu.Item>
+                    </>
+                  )}
                   {/* <Menu.Item>Messages</Menu.Item> */}
                   {/* <Menu.Item>Settings</Menu.Item> */}
                 </Menu.ItemGroup>
@@ -200,6 +268,35 @@ const MenuBar = () => {
               >
                 <Menu.Item onClick={() => setShowGettingStarted(true)}>Getting Started</Menu.Item>
               </Menu>
+            </Col>
+
+            <Col span={24}>
+              <Tooltip
+                title={
+                  isLoggedIn ? (
+                    <>{<FontAwesomeIcon icon={faLock} />} Lock App</>
+                  ) : (
+                    <>
+                      <FontAwesomeIcon icon={faLockOpen} /> Unlock App
+                    </>
+                  )
+                }
+              >
+                <Button
+                  block
+                  icon={<FontAwesomeIcon icon={isLoggedIn ? faLockOpen : faLock} />}
+                  onClick={() => {
+                    if (isLoggedIn) {
+                      dispatch(lockApp);
+                    } else {
+                      dispatch(unlockApp);
+                    }
+                  }}
+                >
+                  &nbsp;&nbsp;
+                  {isLoggedIn ? 'Unclocked' : 'App is Locked'}
+                </Button>
+              </Tooltip>
             </Col>
           </Row>
         </Col>

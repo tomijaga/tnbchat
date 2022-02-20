@@ -3,7 +3,7 @@ import {setStateAuthData, setUserAccounts, setLocalAuthData, unsetUserAccount, c
 import {Account} from 'packages/thenewboston/src';
 import {HdWallet} from 'tnb-hd-wallet';
 import {AppDispatch, Dict, RootState, UserAccount} from 'types';
-import {Aes, getPfp} from 'utils';
+import {Aes, getDefaultPfp} from 'utils';
 import {getCypherAlgorithm, verifyAuth} from './auth';
 
 export const createSeedPhrase = (seedPhrase: string) => (dispatch: AppDispatch, getState: () => RootState) => {
@@ -30,10 +30,10 @@ export const createSeedPhrase = (seedPhrase: string) => (dispatch: AppDispatch, 
 // Derives Account from Seed Phrase
 export function createAccount(dispatch: AppDispatch, getState: () => RootState) {
   const {
-    app: {auth, accounts},
+    app: {auth, managed_accounts},
   } = getState();
 
-  if (Object.keys(accounts).length >= 5) throw new Error("You can't Create or Import more than 5 Accounts");
+  if (Object.keys(managed_accounts).length >= 5) throw new Error("You can't Create or Import more than 5 Accounts");
   const aes = new Aes({hash: auth.session.appEncryptedUserPasswordHash!});
 
   if (auth.local.encryptedSeedPhrase) {
@@ -51,7 +51,7 @@ export function createAccount(dispatch: AppDispatch, getState: () => RootState) 
       encrypted_signing_key: aes.textEncryption(privateKey),
       is_derived: true,
       path,
-      pfp: getPfp(publicKey),
+      pfp: getDefaultPfp(publicKey),
       username: `User-${publicKey.slice(0, 4)}`,
       testnet_balance: 0,
       mainnet_balance: 0,
@@ -72,10 +72,10 @@ export const importAccount =
   ({signingKey}: {signingKey: string}) =>
   (dispatch: AppDispatch, getState: () => RootState) => {
     const {
-      app: {auth, accounts},
+      app: {auth, managed_accounts},
     } = getState();
 
-    if (Object.keys(accounts).length >= 5) throw new Error("You can't Create or Import more than 5 Accounts");
+    if (Object.keys(managed_accounts).length >= 5) throw new Error("You can't Create or Import more than 5 Accounts");
 
     if (signingKey && signingKey.length === 64) {
       const aes = new Aes({hash: auth.session.appEncryptedUserPasswordHash!});
@@ -91,7 +91,7 @@ export const importAccount =
           encrypted_signing_key,
           is_derived: false,
           username: `User-${accountNumber.slice(0, 4)}`,
-          pfp: getPfp(accountNumber),
+          pfp: getDefaultPfp(accountNumber),
           testnet_balance: 0,
           mainnet_balance: 0,
         }),
@@ -108,10 +108,15 @@ export const importAccount =
 
 export const switchUserAccount = (accountNumber: string) => (dispatch: AppDispatch, getState: () => RootState) => {
   const {
-    app: {accounts},
+    app: {
+      managed_accounts,
+      auth: {
+        local: {selectedAccount},
+      },
+    },
   } = getState();
 
-  if (accounts[accountNumber]) {
+  if (managed_accounts[accountNumber] && selectedAccount !== accountNumber) {
     dispatch(
       setLocalAuthData({
         selectedAccount: accountNumber,
@@ -125,10 +130,10 @@ export const removeUserAccount = (accountNumber: string) => (dispatch: AppDispat
     dispatch(unsetUserAccount(accountNumber));
 
     const {
-      app: {accounts},
+      app: {managed_accounts},
     } = getState();
 
-    const firstAccountKey = Object.keys(accounts)[0] ?? '';
+    const firstAccountKey = Object.keys(managed_accounts)[0] ?? '';
 
     dispatch(
       setLocalAuthData({
@@ -151,10 +156,10 @@ export const storeAccountCoins =
   (accountNumber: string, {mainnet, testnet}: Dict<number>) =>
   (dispatch: AppDispatch, getState: () => RootState) => {
     const {
-      app: {accounts},
+      app: {managed_accounts},
     } = getState();
 
-    const account = accounts[accountNumber];
+    const account = managed_accounts[accountNumber];
     if (account) {
       // console.log({mainnet, testnet});
       const accountWithNewData: UserAccount = {

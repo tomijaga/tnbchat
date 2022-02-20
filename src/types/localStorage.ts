@@ -1,9 +1,10 @@
 import {UserAccount, Dict} from 'types';
-import {LocalAuthData, SessionAuthData} from './store';
+import {LocalAuthData, SessionAuthData, DirectMessage} from './store';
 
 export interface LocalStorageData {
   auth: LocalAuthData;
   user_accounts: Dict<UserAccount>;
+  direct_messages: Dict<Dict<DirectMessage>>;
 }
 
 export type LocalStorageKeys = keyof LocalStorageData;

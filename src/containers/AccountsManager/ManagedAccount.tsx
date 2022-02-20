@@ -2,14 +2,14 @@ import Card from 'antd/es/card';
 import Tag from 'antd/es/tag';
 import CheckOutlined from '@ant-design/icons/CheckOutlined';
 import Typography from 'antd/es/typography';
-import {AccountNumber} from 'components';
-import {getPfp} from 'utils';
+import {AccountNumber, ProfilePicture} from 'components';
+import {getDefaultPfp} from 'utils';
 import Grid from 'antd/es/grid';
 import {FC} from 'react';
 import Row from 'antd/es/row';
 import Col from 'antd/es/col';
 
-import {getUserAccount} from 'selectors';
+import {getUserAccount, getUserProfiles} from 'selectors';
 import {UserAccount} from 'types';
 import {useDispatch, useSelector} from 'react-redux';
 import {switchUserAccount} from 'dispatchers/account';
@@ -24,10 +24,17 @@ export const ManagedAccount: FC<{userAccount: UserAccount}> = ({
   const dispatch = useDispatch();
   const currAccount = useSelector(getUserAccount);
 
+  const profiles = useSelector(getUserProfiles);
+
+  const getAccountProfile = (account_number: string) => profiles[account_number];
+  const profile = currAccount?.account_number ? profiles[currAccount.account_number] : null;
+
   const handleSwitchAccount = () => {
     dispatch(switchUserAccount(accountNumber));
     message.info(`Switched Account`);
   };
+
+  console.log({profile});
 
   return (
     <Card
@@ -44,14 +51,14 @@ export const ManagedAccount: FC<{userAccount: UserAccount}> = ({
       )}
 
       <Row gutter={10} align="middle" style={{fontSize: screens.sm ? 'small' : 'small'}}>
-        <Col>
-          <img width={screens.sm ? '50px' : '30px'} src={getPfp(accountNumber)} alt="profile" />
+        <Col style={{paddingLeft: '20px'}}>
+          <ProfilePicture size="large" accountNumber={accountNumber} />
         </Col>
 
         <Col span={7} sm={7} xs={10}>
           <Row justify="center">
             <Col span={24}>
-              <Typography.Text strong>{username}</Typography.Text>
+              <Typography.Text strong>{getAccountProfile(accountNumber)?.display_name}</Typography.Text>
             </Col>
             <Col span={24}>
               <AccountNumber accountNumber={accountNumber} style={{padding: '0px', fontSize: 'small'}} />

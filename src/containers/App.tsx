@@ -1,4 +1,4 @@
-import '../App.less';
+import 'styles/App.less';
 
 import {useEffect} from 'react';
 
@@ -15,6 +15,12 @@ import Home from './Home';
 
 import Profile from './Profile';
 import Thread from './Thread';
+// import Channels from './Channels';
+import Governance from './Governance';
+
+import Wallet from './Wallet';
+import Messages from './Messages';
+
 import AccountsManager from './AccountsManager';
 
 import {verifyAuth} from 'dispatchers/auth';
@@ -51,8 +57,10 @@ export default function App() {
           <Switch>
             <Route path="/home" component={Home} />
             <Route exact path="/accounts/:account_number/" component={Profile} />
-
             <Route exact path="/posts/:balance_key" component={Thread} />
+            <Route exact path="/messages" component={Messages} />
+            <Route exact path="/governance" component={Governance} />
+            <Route exact path="/wallet" component={Wallet} />
 
             <Redirect to="/home" />
           </Switch>

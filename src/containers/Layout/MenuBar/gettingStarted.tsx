@@ -38,6 +38,13 @@ const GettingStarted: FC<{visible: boolean; onClose: () => void}> = ({visible, o
             </ul>
           </Typography.Paragraph>
         </Col>
+
+        <Col>
+          <Typography.Text strong type="danger">
+            Note: Deleting your browser cache/data will cause you to loose all the data on this app including your seed
+            phrase and signing keys
+          </Typography.Text>
+        </Col>
       </Row>
     </Modal>
   );

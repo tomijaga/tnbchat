@@ -1,8 +1,12 @@
 import {PayloadAction} from '@reduxjs/toolkit';
-import {LocalStorageKeys, SessionStorageKeys} from 'types';
+import {AccountNumber, LocalStorageKeys, SessionStorageKeys} from 'types';
 import {localStore, sessionStore} from './storage';
 
-const partialMapUpdater = (object: any, objectWithUpdatedValues: any, callback?: (key: string, value: any) => void) => {
+export const partialObjectUpdate = (
+  object: any,
+  objectWithUpdatedValues: any,
+  callback?: (key: string, value: any) => void,
+) => {
   Object.keys(objectWithUpdatedValues).forEach((key: string) => {
     object[key] = objectWithUpdatedValues[key];
     callback?.(key, objectWithUpdatedValues[key]);
@@ -12,24 +16,42 @@ const partialMapUpdater = (object: any, objectWithUpdatedValues: any, callback?:
 export const setPartialStateReducer =
   <Type extends {[key: string]: any}>() =>
   (state: any, {payload}: PayloadAction<Partial<Type>>) => {
-    partialMapUpdater(state, payload);
+    partialObjectUpdate(state, payload);
+    console.log({state, payload});
+    console.log('state', JSON.stringify(state));
   };
 
-export const setAccountReducer = <T>(state: any, {payload}: PayloadAction<T>) => {
-  return payload;
-};
+export const setAccountNumberReducer =
+  <T extends AccountNumber>() =>
+  (state: any, {payload}: PayloadAction<T>) => {
+    const {account_number} = payload;
+    const accountNumberData = state[account_number];
+    if (accountNumberData) {
+      partialObjectUpdate(accountNumberData, payload);
+    } else {
+      state[account_number] = payload;
+    }
+  };
+
+export const unsetAccountNumberReducer =
+  () =>
+  (state: any, {payload}: PayloadAction<AccountNumber>) => {
+    const {account_number} = payload;
+    delete state[account_number];
+  };
 
 export const setLocalAndPartialStateReducer =
   <T>(localStoreKey: LocalStorageKeys) =>
   (state: any, {payload}: PayloadAction<Partial<T>>) => {
-    partialMapUpdater(state, payload);
+    console.log({state, payload});
+    partialObjectUpdate(state, payload);
     localStore.setItem(localStoreKey, state);
   };
 
 export const setSessionAndPartialStateReducer =
   <T>(localStoreKey: SessionStorageKeys) =>
   (state: any, {payload}: PayloadAction<Partial<T>>) => {
-    partialMapUpdater(state, payload);
+    partialObjectUpdate(state, payload);
     sessionStore.setItem(localStoreKey, state);
   };
 

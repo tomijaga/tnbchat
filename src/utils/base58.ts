@@ -27,9 +27,13 @@ export const encodePostMessage = async (postText: string) => {
 };
 
 export const decodePostMessage = (codedText: string) => {
-  const bytes = bs58.decode(codedText);
-  const codedURI = bytes.reduce((cumulatedText: string, byte: any) => {
-    return (cumulatedText += String.fromCharCode(byte));
-  }, '');
-  return decodeURIComponent(codedURI);
+  try {
+    const bytes = bs58.decode(codedText);
+    const codedURI = bytes.reduce((cumulatedText: string, byte: any) => {
+      return (cumulatedText += String.fromCharCode(byte));
+    }, '');
+    return decodeURIComponent(codedURI);
+  } catch {
+    return codedText;
+  }
 };

@@ -10,8 +10,8 @@ import {
 } from 'utils';
 import {localStore, sessionStore} from 'utils/storage';
 
-const localAuthData = localStore.getItem<LocalAuthData>('auth');
-const sessionAuthData = sessionStore.getItem<SessionAuthData>('auth');
+const localAuthData = localStore.getItem('auth') as Partial<LocalAuthData>;
+const sessionAuthData = sessionStore.getItem('auth') as Partial<SessionAuthData>;
 
 const localAuth = createSlice({
   initialState: {

@@ -1,5 +1,5 @@
 import store from 'store';
-
+import {MessageData} from 'api/message';
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;
 
@@ -33,3 +33,16 @@ export interface AuthStateData {
 }
 
 export type AuthData = AuthStateData & SessionAuthData & LocalAuthData;
+
+export interface RetrievedPaginationData {
+  sent: {start: number; end: number};
+  received: {start: number; end: number};
+}
+
+// messages
+export interface DirectMessage {
+  recipient: string;
+  contents: MessageData[];
+  last_viewed_date: number;
+  retrieved_data?: RetrievedPaginationData;
+}
